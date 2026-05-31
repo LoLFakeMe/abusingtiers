@@ -381,7 +381,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                 <div className="bg-[#0c0c0c] p-5 rounded border border-[#141414] space-y-3">
                   <div className="flex items-center justify-between text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
                     <span className="flex items-center gap-1.5"><IconEye /> Text Preview Monitor</span>
-                    <span className="text-neutral-600 font-mono">Frame: {safeFrameIndex => safeFrameIndex}/{totalFrames}</span>
+                    <span className="text-neutral-600 font-mono">Frame: {currentPreviewFrame + 1}/{totalFrames}</span>
                   </div>
                   <div className="bg-[#040404] border border-[#141414] p-4 rounded text-center font-mono h-14 flex items-center justify-center text-base overflow-hidden">
                     <div dangerouslySetInnerHTML={{ __html: previewHtmlString || '...' }} />
