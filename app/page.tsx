@@ -34,71 +34,75 @@ const IconExternalLink = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
 );
 
-export default function AppWorkspace() {
-  // Navigation Router state panel mapping ('home', 'generator', 'plugins', 'credits')
-  const [activeTab, setActiveTab] = useState<'home' | 'generator' | 'plugins' | 'credits'>('home');
+export default function AppMainLayout() {
+  // Navigation Tabs state routing
+  const [currentTab, setCurrentTab] = useState<'home' | 'generator' | 'plugins' | 'credits'>('home');
 
-  // Prefix Generator state variables
-  const [text, setText] = useState('MINE');
-  const [numFrames, setNumFrames] = useState(100);
-  const [delay, setDelay] = useState(1.2);
-  const [speed, setSpeed] = useState(2);
-  const [formats, setFormats] = useState({ italic: true, underline: false, strikethrough: false });
+  // Input control states
+  const [prefixText, setPrefixText] = useState('MINE');
+  const [totalFrames, setTotalFrames] = useState(100);
+  const [animationDelay, setAnimationDelay] = useState(1.2);
+  const [animationSpeed, setAnimationSpeed] = useState(2);
+  const [textFormats, setTextFormats] = useState({ italic: true, underline: false, strikethrough: false });
 
-  const [generatedCode, setGeneratedCode] = useState('');
-  const [copied, setCopied] = useState(false);
-  const [previewFrame, setPreviewFrame] = useState(0);
-  const [previewText, setPreviewText] = useState('');
+  // Generated code and preview helper states
+  const [outputCode, setOutputCode] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
+  const [currentPreviewFrame, setCurrentPreviewFrame] = useState(0);
+  const [previewHtmlString, setPreviewHtmlString] = useState('');
 
-  const getFormatString = () => {
-    let token = '';
-    if (formats.italic) token += '&o';
-    if (formats.underline) token += '&n';
-    if (formats.strikethrough) token += '&m';
-    return token;
+  const assembleFormattingCodes = () => {
+    let codeString = '';
+    if (textFormats.italic) codeString += '&o';
+    if (textFormats.underline) codeString += '&n';
+    if (textFormats.strikethrough) codeString += '&m';
+    return codeString;
   };
 
-  const handleFrameChange = (val: number) => {
-    let checked = Math.max(2, val);
-    if (checked > 100) checked = 100;
-    setNumFrames(checked);
+  const handleFrameChange = (newValue: number) => {
+    let validatedValue = Math.max(2, newValue);
+    if (validatedValue > 100) validatedValue = 100;
+    setTotalFrames(validatedValue);
   };
 
-  const handleDelayChange = (val: number) => {
-    const checked = Math.max(1.2, parseFloat(val.toFixed(1)) || 1.2);
-    setDelay(checked);
+  const handleDelayChange = (newValue: number) => {
+    const validatedValue = Math.max(1.2, parseFloat(newValue.toFixed(1)) || 1.2);
+    setAnimationDelay(validatedValue);
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generatedCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const executeClipboardCopy = () => {
+    navigator.clipboard.writeText(outputCode);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const injectSpecialChar = (unicodeStr: string) => {
-    setText(prev => prev + unicodeStr);
+  const handleCharacterInjection = (character: string) => {
+    setPrefixText(previousString => previousString + character);
   };
 
-  const hslToHex = (h: number, s: number, l: number): string => {
-    const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    const m = l - c / 2;
-    let r = 0, g = 0, b = 0;
-    if (h < 60) { r = c; g = x; b = 0; }
-    else if (h < 120) { r = x; g = c; b = 0; }
-    else if (h < 180) { r = 0; g = c; b = x; }
-    else if (h < 240) { r = 0; g = x; b = c; }
-    else if (h < 300) { r = x; g = 0; b = c; }
-    else { r = c; g = 0; b = x; }
-    const rHex = Math.floor((r + m) * 255).toString(16).padStart(2, '0').toUpperCase();
-    const gHex = Math.floor((g + m) * 255).toString(16).padStart(2, '0').toUpperCase();
-    const bHex = Math.floor((b + m) * 255).toString(16).padStart(2, '0').toUpperCase();
-    return `#${rHex}${gHex}${bHex}`;
+  const calculateHslColor = (hueValue: number, saturation: number, lightness: number): string => {
+    const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+    const secondaryComponent = chroma * (1 - Math.abs(((hueValue / 60) % 2) - 1));
+    const baselineBrightness = lightness - chroma / 2;
+    let redValue = 0, greenValue = 0, blueValue = 0;
+
+    if (hueValue < 60) { redValue = chroma; greenValue = secondaryComponent; blueValue = 0; }
+    else if (hueValue < 120) { redValue = secondaryComponent; greenValue = chroma; blueValue = 0; }
+    else if (hueValue < 180) { redValue = 0; greenValue = chroma; blueValue = secondaryComponent; }
+    else if (hueValue < 240) { redValue = 0; greenValue = secondaryComponent; blueValue = chroma; }
+    else if (hueValue < 300) { redValue = secondaryComponent; greenValue = 0; blueValue = chroma; }
+    else { redValue = chroma; greenValue = 0; blueValue = secondaryComponent; }
+
+    const hexRed = Math.floor((redValue + baselineBrightness) * 255).toString(16).padStart(2, '0').toUpperCase();
+    const hexGreen = Math.floor((greenValue + baselineBrightness) * 255).toString(16).padStart(2, '0').toUpperCase();
+    const hexBlue = Math.floor((blueValue + baselineBrightness) * 255).toString(16).padStart(2, '0').toUpperCase();
+    return `#${hexRed}${hexGreen}${hexBlue}`;
   };
 
+  // Build generated Python script file matching settings criteria
   useEffect(() => {
-    const fmtStr = getFormatString();
-    const script = `import minescript
+    const formatTags = assembleFormattingCodes();
+    const scriptTemplate = `import minescript
 import time
 
 def hsl_to_hex(h, s, l):
@@ -116,10 +120,10 @@ def hsl_to_hex(h, s, l):
     b = int((b + m) * 255)
     return f"#{r:02X}{g:02X}{b:02X}"
 
-text       = "${text}"
-NUM_FRAMES = ${numFrames}
-DELAY      = ${delay}
-fmt        = "${fmtStr}"
+text       = "${prefixText}"
+NUM_FRAMES = ${totalFrames}
+DELAY      = ${animationDelay}
+fmt        = "${formatTags}"
 
 frames = []
 for frame_i in range(NUM_FRAMES):
@@ -128,7 +132,7 @@ for frame_i in range(NUM_FRAMES):
     hue = t_pp * 300
     color = hsl_to_hex(hue, 1.0, 0.5)
 
-    k_speed = ${speed} 
+    k_speed = ${animationSpeed} 
     k_val = (frame_i * k_speed / (NUM_FRAMES - 1)) % 2.0
     k_bounce = 1 - abs(k_val - 1)
     k_pos = int(k_bounce * (len(text) - 0.001))
@@ -149,55 +153,58 @@ for i, frame in enumerate(frames):
     time.sleep(DELAY)
 
 minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
-    setGeneratedCode(script);
-  }, [text, numFrames, delay, formats, speed]);
+    setOutputCode(scriptTemplate);
+  }, [prefixText, totalFrames, animationDelay, textFormats, animationSpeed]);
 
+  // Handle active rendering ticks for continuous sandbox element animation
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPreviewFrame((prev) => (prev + 1) % (numFrames || 1));
-    }, delay * 110);
-    return () => clearInterval(interval);
-  }, [numFrames, delay]);
+    const playTicker = setInterval(() => {
+      setCurrentPreviewFrame((previousFrame) => (previousFrame + 1) % (totalFrames || 1));
+    }, animationDelay * 110);
+    return () => clearInterval(playTicker);
+  }, [totalFrames, animationDelay]);
 
+  // Build safe HTML string inside dashboard visualization terminal
   useEffect(() => {
-    if (!text.length) {
-      setPreviewText('');
+    if (!prefixText.length) {
+      setPreviewHtmlString('');
       return;
     }
-    const currentFrameSafe = previewFrame % (numFrames || 1);
-    const t = currentFrameSafe / ((numFrames - 1) || 1);
-    const t_pp = 1 - Math.abs(2 * t - 1);
-    const color = hslToHex(t_pp * 300, 1.0, 0.5);
+    const safeFrameIndex = currentPreviewFrame % (totalFrames || 1);
+    const normalizedProgress = safeFrameIndex / ((totalFrames - 1) || 1);
+    const waveProgress = 1 - Math.abs(2 * normalizedProgress - 1);
+    const targetHexColor = calculateHslColor(waveProgress * 300, 1.0, 0.5);
 
-    const k_val = (currentFrameSafe * speed / ((numFrames - 1) || 1)) % 2.0;
-    const k_bounce = 1 - Math.abs(k_val - 1);
-    const k_pos = Math.floor(k_bounce * (text.length - 0.001));
+    const animationWaveValue = (safeFrameIndex * animationSpeed / ((totalFrames - 1) || 1)) % 2.0;
+    const waveBouncePosition = 1 - Math.abs(animationWaveValue - 1);
+    const illuminatedCharIndex = Math.floor(waveBouncePosition * (prefixText.length - 0.001));
 
-    let textStructure = '';
-    for (let i = 0; i < text.length; i++) {
-      let charDisplay = text[i];
-      let isSpecial = false;
-      if (charDisplay === '\u200C') { charDisplay = '❲ZWNJ❳'; isSpecial = true; }
-      else if (charDisplay === '\u200B') { charDisplay = '❲ZWSP❳'; isSpecial = true; }
-      else if (charDisplay === '\u2060') { charDisplay = '❲WJ❳'; isSpecial = true; }
+    let constructedHtml = '';
+    for (let loopIndex = 0; loopIndex < prefixText.length; loopIndex++) {
+      let activeCharacter = prefixText[loopIndex];
+      let hasSpecialFormat = false;
+      
+      if (activeCharacter === '\u200C') { activeCharacter = '❲ZWNJ❳'; hasSpecialFormat = true; }
+      else if (activeCharacter === '\u200B') { activeCharacter = '❲ZWSP❳'; hasSpecialFormat = true; }
+      else if (activeCharacter === '\u2060') { activeCharacter = '❲WJ❳'; hasSpecialFormat = true; }
 
-      const styles = `
-        color: ${isSpecial ? '#555555' : color};
-        font-size: ${isSpecial ? '10px' : 'inherit'};
-        font-weight: ${i === k_pos && !isSpecial ? 'bold' : 'normal'}; 
-        font-style: ${formats.italic && !isSpecial ? 'italic' : 'normal'};
-        text-decoration: ${formats.underline && !isSpecial ? 'underline' : formats.strikethrough && !isSpecial ? 'line-through' : 'none'};
-        padding: ${isSpecial ? '0 2px' : '0'};
+      const elementStyles = `
+        color: ${hasSpecialFormat ? '#555555' : targetHexColor};
+        font-size: ${hasSpecialFormat ? '10px' : 'inherit'};
+        font-weight: ${loopIndex === illuminatedCharIndex && !hasSpecialFormat ? 'bold' : 'normal'}; 
+        font-style: ${textFormats.italic && !hasSpecialFormat ? 'italic' : 'normal'};
+        text-decoration: ${textFormats.underline && !hasSpecialFormat ? 'underline' : textFormats.strikethrough && !hasSpecialFormat ? 'line-through' : 'none'};
+        padding: ${hasSpecialFormat ? '0 2px' : '0'};
       `;
-      textStructure += `<span style="${styles}">${charDisplay}</span>`;
+      constructedHtml += `<span style="${elementStyles}">${activeCharacter}</span>`;
     }
-    setPreviewText(textStructure);
-  }, [previewFrame, text, numFrames, speed, formats]);
+    setPreviewHtmlString(constructedHtml);
+  }, [currentPreviewFrame, prefixText, totalFrames, animationSpeed, textFormats]);
 
   return (
-    <div className="min-h-screen bg-[#060606] text-[#CECECE] flex flex-col selection:bg-[#252525]" style={{ fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
+    <div className="min-h-screen bg-[#060606] text-[#CECECE] flex flex-col selection:bg-[#222222]" style={{ fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       
-      {/* Global Embedded CSS Animations & Utilities */}
+      {/* Global Scrollbars and View Animations */}
       <style dangerouslySetInnerHTML={{__html: `
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: #0a0a0a; }
@@ -205,110 +212,110 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #2d2d2d; }
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulseSlow { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.4; } }
-        .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-pulse-slow { animation: pulseSlow 4s ease-in-out infinite; }
+        @keyframes viewFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes wrapperSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes glowPulseSlow { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.4; } }
+        .animate-view-fade { animation: viewFadeIn 0.4s ease forwards; }
+        .animate-wrapper-slide { animation: wrapperSlideUp 0.6s ease forwards; }
+        .animate-glow-pulse { animation: glowPulseSlow 4s ease-in-out infinite; }
       `}} />
 
-      {/* FIXED TOPBAR NAVIGATION HEADER */}
-      <nav className="sticky top-0 z-50 bg-[#060606]/80 backdrop-blur-md border-b border-[#141414] px-6 h-14 flex items-center justify-between transition-all duration-300">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('home')}>
+      {/* TOPBAR NAVIGATION HEADER */}
+      <nav className="sticky top-0 z-50 bg-[#060606]/80 backdrop-blur-md border-b border-[#141414] px-6 h-14 flex items-center justify-between">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentTab('home')}>
           <div className="w-5 h-5 rounded bg-white flex items-center justify-center text-black font-mono font-bold text-xs shadow-sm">M</div>
-          <span className="text-sm font-semibold tracking-tight text-[#EDEDED]">Minescript Nexus</span>
+          <span className="text-sm font-semibold tracking-tight text-[#EDEDED]">Minescript Hub</span>
         </div>
         
-        {/* Router Tab Menu List */}
+        {/* Navigation Menu Selection Toolbar */}
         <div className="flex items-center gap-1">
-          {(['home', 'generator', 'plugins', 'credits'] as const).map((tab) => (
+          {(['home', 'generator', 'plugins', 'credits'] as const).map((tabName) => (
             <button
-              key={tab}
+              key={tabName}
               type="button"
-              onClick={() => setActiveTab(tab)}
-              className={`text-xs px-3 py-1.5 rounded font-medium capitalize tracking-wide transition-all duration-200 ${activeTab === tab ? 'bg-[#121212] text-white border border-[#1f1f1f]' : 'text-neutral-500 hover:text-neutral-200 border border-transparent'}`}
+              onClick={() => setCurrentTab(tabName)}
+              className={`text-xs px-3 py-1.5 rounded font-medium capitalize tracking-wide transition-all ${currentTab === tabName ? 'bg-[#121212] text-white border border-[#1f1f1f]' : 'text-neutral-500 hover:text-neutral-200 border border-transparent'}`}
             >
-              {tab === 'generator' ? 'Prefix Engine' : tab === 'plugins' ? 'Our Plugins' : tab}
+              {tabName === 'generator' ? 'Prefix Builder' : tabName === 'plugins' ? 'My Plugins' : tabName}
             </button>
           ))}
         </div>
       </nav>
 
-      {/* CORE FRAMEWORK WORKSPACE SWITCH ROUTER */}
+      {/* INTERACTIVE COMPONENT MOUNT POINT */}
       <div className="flex-1 max-w-5xl w-full mx-auto p-6 md:p-10 flex flex-col justify-center relative">
         
-        {/* Dynamic Background Accent blur effect */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-neutral-800/10 rounded-full blur-[120px] pointer-events-none animate-pulse-slow" />
+        {/* Ambient background styling layer */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-neutral-800/10 rounded-full blur-[120px] pointer-events-none animate-glow-pulse" />
 
-        {/* PAGE 1: HOME PAGE (HERO LANDING HUB) */}
-        {activeTab === 'home' && (
-          <div className="space-y-10 py-8 animate-slide-up text-center md:text-left max-w-2xl mx-auto">
+        {/* TAB LAYER 1: HOMEPAGE INTRO HERO SECTION */}
+        {currentTab === 'home' && (
+          <div className="space-y-10 py-8 animate-wrapper-slide text-center md:text-left max-w-2xl mx-auto">
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#0d0d0d] border border-[#161616] text-[11px] font-medium tracking-wide text-neutral-400 uppercase">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> Production Ready Pipeline
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> Live Utility Terminal
               </div>
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
-                Automate Your In-Game <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">Chat Environment Framework</span>
+                Animate Your Chat Layouts <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">With Automated Code Blocks</span>
               </h1>
               <p className="text-sm text-neutral-500 leading-relaxed max-w-xl mx-auto md:mx-0">
-                An ecosystem designed to build, compile, and distribute specialized automation packages for modern server interfaces and client terminal hooks.
+                A custom dashboard designed to configure, generate, and build lightweight python scripts for chat styling configurations.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3">
               <button
                 type="button"
-                onClick={() => setActiveTab('generator')}
+                onClick={() => setCurrentTab('generator')}
                 className="w-full sm:w-auto bg-white hover:bg-neutral-200 text-black text-xs font-semibold px-5 py-2.5 rounded shadow-sm transition-all active:scale-[0.98]"
               >
-                Launch Prefix Engine
+                Open Prefix Builder
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab('plugins')}
+                onClick={() => setCurrentTab('plugins')}
                 className="w-full sm:w-auto bg-[#0d0d0d] hover:bg-[#121212] border border-[#1c1c1c] hover:border-neutral-700 text-neutral-300 text-xs font-semibold px-5 py-2.5 rounded transition-all active:scale-[0.98]"
               >
-                Browse Our Plugins
+                View Plugin Downloads
               </button>
             </div>
           </div>
         )}
 
-        {/* PAGE 2: MINESCRIPT GENERATOR INTERFACE */}
-        {activeTab === 'generator' && (
-          <div className="space-y-6 animate-fade-in">
+        {/* TAB LAYER 2: MINESCRIPT BUILDER PANEL */}
+        {currentTab === 'generator' && (
+          <div className="space-y-6 animate-view-fade">
             <div>
-              <h2 className="text-lg font-medium text-white">Dynamic Color Animation Compositor</h2>
-              <p className="text-xs text-neutral-500 mt-0.5">Generates automated vector text frames utilizing native layout structures.</p>
+              <h2 className="text-lg font-medium text-white">Prefix Style Setup Terminal</h2>
+              <p className="text-xs text-neutral-500 mt-0.5">Customize lines, text speed parameters, and specific padding elements below.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-              {/* Configuration adjustments matrix */}
+              {/* Variable control box section */}
               <section className="md:col-span-5 space-y-5">
                 <div className="space-y-4 bg-[#0c0c0c] p-5 rounded border border-[#141414]">
                   <div>
-                    <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">Prefix Plain Text</label>
+                    <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">Text String</label>
                     <input 
                       type="text" 
-                      value={text} 
-                      onChange={(e) => setText(e.target.value)}
+                      value={prefixText} 
+                      onChange={(e) => setPrefixText(e.target.value)}
                       className="w-full bg-[#040404] border border-[#1a1a1a] rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-neutral-600 transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">Inject Hidden Codes</label>
+                    <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">Inject Hidden Padding Characters</label>
                     <div className="grid grid-cols-3 gap-1.5">
-                      { [['\u200C', 'ZWNJ'], ['\u200B', 'ZWSP'], ['\u2060', 'WJ']].map(([char, name]) => (
+                      { [['\u200C', 'ZWNJ'], ['\u200B', 'ZWSP'], ['\u2060', 'WJ']].map(([character, labelName]) => (
                         <button 
-                          key={name}
+                          key={labelName}
                           type="button"
-                          onClick={() => injectSpecialChar(char)}
+                          onClick={() => handleCharacterInjection(character)}
                           className="bg-[#040404] border border-[#1a1a1a] hover:border-neutral-600 px-2 py-1.5 text-[10px] rounded text-neutral-400 transition-all active:scale-95"
                         >
-                          + {name}
+                          + {labelName}
                         </button>
                       ))}
                     </div>
@@ -321,107 +328,106 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                         <span className="text-[9px] text-neutral-600">Max 100</span>
                       </div>
                       <div className="relative flex items-center bg-[#040404] border border-[#1a1a1a] rounded focus-within:border-neutral-600 transition-all">
-                        <input type="number" value={numFrames} onChange={(e) => handleFrameChange(parseInt(e.target.value) || 0)} className="w-full bg-transparent px-3 py-2 text-xs text-white focus:outline-none" />
+                        <input type="number" value={totalFrames} onChange={(e) => handleFrameChange(parseInt(e.target.value) || 0)} className="w-full bg-transparent px-3 py-2 text-xs text-white focus:outline-none" />
                         <div className="flex flex-col border-l border-[#1a1a1a] h-full">
-                          <button type="button" onClick={() => handleFrameChange(numFrames + 1)} className="p-1 text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronUp /></button>
-                          <button type="button" onClick={() => handleFrameChange(numFrames - 1)} className="p-1 border-t border-[#1a1a1a] text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronDown /></button>
+                          <button type="button" onClick={() => handleFrameChange(totalFrames + 1)} className="p-1 text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronUp /></button>
+                          <button type="button" onClick={() => handleFrameChange(totalFrames - 1)} className="p-1 border-t border-[#1a1a1a] text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronDown /></button>
                         </div>
                       </div>
                     </div>
 
                     <div>
                       <div className="flex justify-between items-center mb-1.5">
-                        <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">Delay</label>
-                        <span className="text-[9px] text-neutral-600">Min 1.2</span>
+                        <label className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">Delay Step</label>
+                        <span className="text-[9px] text-neutral-600">Min 1.2s</span>
                       </div>
                       <div className="relative flex items-center bg-[#040404] border border-[#1a1a1a] rounded focus-within:border-neutral-600 transition-all">
-                        <input type="number" step="0.1" value={delay} onChange={(e) => handleDelayChange(parseFloat(e.target.value) || 0)} className="w-full bg-transparent px-3 py-2 text-xs text-white focus:outline-none" />
+                        <input type="number" step="0.1" value={animationDelay} onChange={(e) => handleDelayChange(parseFloat(e.target.value) || 0)} className="w-full bg-transparent px-3 py-2 text-xs text-white focus:outline-none" />
                         <div className="flex flex-col border-l border-[#1a1a1a] h-full">
-                          <button type="button" onClick={() => handleDelayChange(delay + 0.1)} className="p-1 text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronUp /></button>
-                          <button type="button" onClick={() => handleDelayChange(delay - 0.1)} className="p-1 border-t border-[#1a1a1a] text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronDown /></button>
+                          <button type="button" onClick={() => handleDelayChange(animationDelay + 0.1)} className="p-1 text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronUp /></button>
+                          <button type="button" onClick={() => handleDelayChange(animationDelay - 0.1)} className="p-1 border-t border-[#1a1a1a] text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronDown /></button>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">Wave Elasticity Speed</label>
+                    <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">Wave Velocity Speed</label>
                     <div className="relative flex items-center bg-[#040404] border border-[#1a1a1a] rounded focus-within:border-neutral-600 transition-all">
-                      <input type="number" value={speed} onChange={(e) => setSpeed(Math.max(1, parseInt(e.target.value) || 0))} className="w-full bg-transparent px-3 py-2 text-xs text-white focus:outline-none" />
+                      <input type="number" value={animationSpeed} onChange={(e) => setAnimationSpeed(Math.max(1, parseInt(e.target.value) || 0))} className="w-full bg-transparent px-3 py-2 text-xs text-white focus:outline-none" />
                       <div className="flex flex-col border-l border-[#1a1a1a] h-full">
-                        <button type="button" onClick={() => setSpeed(speed + 1)} className="p-1 text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronUp /></button>
-                        <button type="button" onClick={() => setSpeed(Math.max(1, speed - 1))} className="p-1 border-t border-[#1a1a1a] text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronDown /></button>
+                        <button type="button" onClick={() => setAnimationSpeed(animationSpeed + 1)} className="p-1 text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronUp /></button>
+                        <button type="button" onClick={() => setAnimationSpeed(Math.max(1, animationSpeed - 1))} className="p-1 border-t border-[#1a1a1a] text-neutral-500 hover:text-neutral-200 hover:bg-[#0d0d0d] transition-all"><IconChevronDown /></button>
                       </div>
                     </div>
                   </div>
 
                   <div className="pt-3 border-t border-[#141414]">
-                    <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-2">Style Formats Matrix</label>
+                    <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-2">Text Formatting Switches</label>
                     <div className="space-y-2">
-                      {(Object.keys(formats) as Array<keyof typeof formats>).map((key) => (
-                        <div key={key} onClick={() => setFormats(prev => ({ ...prev, [key]: !prev[key] }))} className="flex items-center gap-3 cursor-pointer group select-none py-0.5">
-                          <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${formats[key] ? 'bg-white border-white text-black' : 'bg-transparent border-[#262626] group-hover:border-neutral-500'}`}>
-                            {formats[key] && <div className="w-1.5 h-1.5 bg-black rounded-sm" />}
+                      {(Object.keys(textFormats) as Array<keyof typeof textFormats>).map((formatKey) => (
+                        <div key={formatKey} onClick={() => setTextFormats(previousFormats => ({ ...previousFormats, [formatKey]: !previousFormats[formatKey] }))} className="flex items-center gap-3 cursor-pointer group select-none py-0.5">
+                          <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${textFormats[formatKey] ? 'bg-white border-white text-black' : 'bg-transparent border-[#262626] group-hover:border-neutral-500'}`}>
+                            {textFormats[formatKey] && <div className="w-1.5 h-1.5 bg-black rounded-sm" />}
                           </div>
-                          <span className="text-xs text-neutral-400 group-hover:text-neutral-200 transition-colors capitalize">{key}</span>
+                          <span className="text-xs text-neutral-400 group-hover:text-neutral-200 transition-colors capitalize">{formatKey}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                {/* Local Frame Render Output Terminal */}
+                {/* Local Sandbox Terminal Display Window */}
                 <div className="bg-[#0c0c0c] p-5 rounded border border-[#141414] space-y-3">
                   <div className="flex items-center justify-between text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
-                    <span className="flex items-center gap-1.5"><IconEye /> Realtime Sandbox Monitor</span>
-                    <span className="text-neutral-600 font-mono">F: {previewFrame + 1}/{numFrames}</span>
+                    <span className="flex items-center gap-1.5"><IconEye /> Text Preview Monitor</span>
+                    <span className="text-neutral-600 font-mono">Frame: {safeFrameIndex => safeFrameIndex}/{totalFrames}</span>
                   </div>
                   <div className="bg-[#040404] border border-[#141414] p-4 rounded text-center font-mono h-14 flex items-center justify-center text-base overflow-hidden">
-                    <div dangerouslySetInnerHTML={{ __html: previewText || '...' }} />
+                    <div dangerouslySetInnerHTML={{ __html: previewHtmlString || '...' }} />
                   </div>
                 </div>
               </section>
 
-              {/* Code Panel Display Column */}
+              {/* Text Area Output Script Window Column */}
               <section className="md:col-span-7 flex flex-col space-y-2">
                 <div className="flex items-center justify-between text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">
-                  <span className="flex items-center gap-2"><IconCode /> Auto-Compiled Python Program</span>
-                  <button type="button" onClick={handleCopy} className="flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-white bg-[#0c0c0c] border border-[#141414] px-3 py-1 rounded transition-all hover:border-neutral-600 active:scale-95">
-                    {copied ? <><IconCheck /><span className="text-neutral-300">Copied</span></> : <><IconCopy /><span>Copy Output</span></>}
+                  <span className="flex items-center gap-2"><IconCode /> Generated Script Output</span>
+                  <button type="button" onClick={executeClipboardCopy} className="flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-white bg-[#0c0c0c] border border-[#141414] px-3 py-1 rounded transition-all hover:border-neutral-600 active:scale-95">
+                    {isCopied ? <><IconCheck /><span className="text-neutral-300">Copied</span></> : <><IconCopy /><span>Copy Output</span></>}
                   </button>
                 </div>
                 <div className="flex-1 bg-[#0c0c0c] border border-[#141414] rounded p-4 font-mono text-xs overflow-auto max-h-[480px] text-neutral-400 leading-relaxed custom-scroll">
-                  <pre className="whitespace-pre select-all">{generatedCode}</pre>
+                  <pre className="whitespace-pre select-all">{outputCode}</pre>
                 </div>
               </section>
             </div>
           </div>
         )}
 
-        {/* PAGE 3: PLUGINS DOWNLOAD MARKETPLACE HUB */}
-        {activeTab === 'plugins' && (
-          <div className="space-y-6 animate-fade-in max-w-2xl mx-auto w-full">
+        {/* TAB LAYER 3: PLUGINS SECTION */}
+        {currentTab === 'plugins' && (
+          <div className="space-y-6 animate-view-fade max-w-2xl mx-auto w-full">
             <div>
-              <h2 className="text-lg font-medium text-white">Extensions Repository</h2>
-              <p className="text-xs text-neutral-500 mt-0.5">Optimized production extensions available for public deployment.</p>
+              <h2 className="text-lg font-medium text-white">Plugin Repository</h2>
+              <p className="text-xs text-neutral-500 mt-0.5">Download custom server chat tools and utilities.</p>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              {/* Product Card Row */}
               <div className="bg-[#0c0c0c] border border-[#141414] hover:border-[#1f1f1f] p-5 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-300 group">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-white tracking-tight">PrefixCore Automation Engine</span>
+                    <span className="text-xs font-semibold text-white tracking-tight">PrefixCore Utility Extension</span>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#161616] border border-[#222] font-mono text-neutral-400">v1.4.0</span>
                   </div>
                   <p className="text-xs text-neutral-500 max-w-md leading-relaxed">
-                    Processes asynchronous macro strings instantly inside server clusters. Features native support for handling multi-byte invisible padding.
+                    Processes asynchronous layout strings instantly. Includes custom character translation filters.
                   </p>
                 </div>
                 <div>
                   <a 
                     href="#" 
-                    className="inline-flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 text-black text-xs font-semibold px-4 py-2 rounded transition-all group-hover:translate-x-0.5"
+                    className="inline-flex items-center gap-2 bg-white hover:bg-neutral-200 text-black text-xs font-semibold px-4 py-2 rounded transition-all group-hover:translate-x-0.5"
                     onClick={(e) => e.preventDefault()}
                   >
                     <IconDownload /> Download .JAR
@@ -429,47 +435,46 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                 </div>
               </div>
 
-              {/* Showcase Sub-Card Layout */}
               <div className="bg-[#0c0c0c] border border-[#141414] p-5 rounded opacity-60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-neutral-300 tracking-tight">Terminal Packet Interceptor</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#161616] font-mono text-neutral-500">Scheduled</span>
+                    <span className="text-xs font-semibold text-neutral-300 tracking-tight">Packet Interceptor Hook</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#161616] font-mono text-neutral-500">Upcoming</span>
                   </div>
                   <p className="text-xs text-neutral-500 max-w-sm">
-                    Inbound logging diagnostic terminal module. Out-of-the-box support for managing client configurations.
+                    Inbound packet diagnostic manager tool with modular channel layouts.
                   </p>
                 </div>
                 <div className="text-[11px] text-neutral-600 font-medium italic tracking-wider">
-                  Development Pending
+                  In Development
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* PAGE 4: CREDITS PAGE ROSTER */}
-        {activeTab === 'credits' && (
-          <div className="space-y-6 animate-fade-in max-w-xl mx-auto w-full">
+        {/* TAB LAYER 4: CREDITS PAGE */}
+        {currentTab === 'credits' && (
+          <div className="space-y-6 animate-view-fade max-w-xl mx-auto w-full">
             <div>
-              <h2 className="text-lg font-medium text-white">System Architecture Credits</h2>
-              <p className="text-xs text-neutral-500 mt-0.5">Core maintainers and upstream library dependencies.</p>
+              <h2 className="text-lg font-medium text-white">App Credits</h2>
+              <p className="text-xs text-neutral-500 mt-0.5">Project credits and module dependencies used to construct the interface.</p>
             </div>
 
             <div className="bg-[#0c0c0c] border border-[#141414] rounded divide-y divide-[#141414]">
               <div className="p-4 flex items-center justify-between text-xs">
-                <span className="font-semibold text-neutral-300">Lead Architectural Design</span>
-                <span className="text-neutral-500 font-mono">Development Team Nexus</span>
+                <span className="font-semibold text-neutral-300">Lead Frontend Developer</span>
+                <span className="text-neutral-500 font-mono">Core Engineering Team</span>
               </div>
               <div className="p-4 flex items-center justify-between text-xs">
-                <span className="font-semibold text-neutral-300">Minescript Integration Pipeline</span>
+                <span className="font-semibold text-neutral-300">Minescript API Hook Reference</span>
                 <a href="https://github.com/mcaron/minescript" target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-white flex items-center gap-1 transition-colors">
                   mcaron / minescript <IconExternalLink />
                 </a>
               </div>
               <div className="p-4 flex items-center justify-between text-xs">
-                <span className="font-semibold text-neutral-300">Visual Interface Matrix</span>
-                <span className="text-neutral-500 font-mono">Tailwind Engine Structural Spec</span>
+                <span className="font-semibold text-neutral-300">UI Framework Library</span>
+                <span className="text-neutral-500 font-mono">Tailwind Utility Engine CSS Specification</span>
               </div>
             </div>
           </div>
@@ -479,7 +484,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
 
       {/* FOOTER */}
       <footer className="text-center text-[10px] text-neutral-700 py-6 border-t border-[#141414] tracking-wider uppercase">
-        Minescript Network Infrastructure Core Hub Matrix
+        Application Utilities System Layout Portal
       </footer>
     </div>
   );
