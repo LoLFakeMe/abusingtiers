@@ -62,6 +62,13 @@ export default function MinescriptGenerator() {
     setDelay(checked);
   };
 
+  // Action callback to handle user clipboard interactions
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   // Helper insertion function for invisible Unicode payloads
   const injectSpecialChar = (unicodeStr: string) => {
     setText(prev => prev + unicodeStr);
@@ -149,7 +156,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
   useEffect(() => {
     const interval = setInterval(() => {
       setPreviewFrame((prev) => (prev + 1) % (numFrames || 1));
-    }, delay * 110); // Local playback step logic normalized configuration
+    }, delay * 110);
     return () => clearInterval(interval);
   }, [numFrames, delay]);
 
@@ -170,7 +177,6 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
 
     let textStructure = '';
     for (let i = 0; i < text.length; i++) {
-      // Decode hidden characters visually inside our UI matrix so they are discoverable
       let charDisplay = text[i];
       let isSpecial = false;
       
@@ -231,6 +237,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                 <label className="block text-xs font-medium text-neutral-400 mb-1.5">Inject Invisible Unicode Characters</label>
                 <div className="grid grid-cols-3 gap-1.5">
                   <button 
+                    type="button"
                     onClick={() => injectSpecialChar('\u200C')}
                     className="bg-[#181818] border border-[#252525] hover:border-neutral-500 px-2 py-1.5 text-[10px] rounded text-neutral-300 transition-colors text-center"
                     title="Zero Width Non-Joiner"
@@ -238,6 +245,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                     + ZWNJ
                   </button>
                   <button 
+                    type="button"
                     onClick={() => injectSpecialChar('\u200B')}
                     className="bg-[#181818] border border-[#252525] hover:border-neutral-500 px-2 py-1.5 text-[10px] rounded text-neutral-300 transition-colors text-center"
                     title="Zero Width Space"
@@ -245,6 +253,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                     + ZWSP
                   </button>
                   <button 
+                    type="button"
                     onClick={() => injectSpecialChar('\u2060')}
                     className="bg-[#181818] border border-[#252525] hover:border-neutral-500 px-2 py-1.5 text-[10px] rounded text-neutral-300 transition-colors text-center"
                     title="Word Joiner"
@@ -347,6 +356,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
             <div className="flex items-center justify-between text-sm font-medium text-white mb-1">
               <span className="flex items-center gap-2"><IconCode /> Generated Script Output</span>
               <button 
+                type="button"
                 onClick={handleCopy}
                 className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white bg-[#121212] hover:bg-[#1A1A1A] border border-[#1A1A1A] px-2.5 py-1 rounded transition-all active:scale-[0.98]"
               >
