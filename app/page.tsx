@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 
-// --- MINIMALIST INLINE SVG ICONS (Replaces lucide-react to avoid dependency errors) ---
+// --- INLINE SVG ICONS ---
 const IconTerminal = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
 );
 const IconSettings = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15-.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
 );
 const IconCode = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
@@ -18,24 +18,56 @@ const IconCopy = () => (
 const IconCheck = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
 );
-const IconSparkles = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg>
+const IconEye = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
 );
 
 export default function MinescriptGenerator() {
-  // State variables for application controls
+  // Config state keys
   const [text, setText] = useState('MINE');
   const [numFrames, setNumFrames] = useState(100);
   const [delay, setDelay] = useState(1.2);
-  const [format, setFormat] = useState('&o');
   const [speed, setSpeed] = useState(2);
   
+  // Multi-formatting token selections
+  const [formats, setFormats] = useState({
+    italic: true,    // &o
+    underline: false, // &n
+    strikethrough: false, // &m
+  });
+
   const [generatedCode, setGeneratedCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [previewFrame, setPreviewFrame] = useState(0);
   const [previewText, setPreviewText] = useState('');
 
-  // HSL to HEX translation matching the original script matrix
+  // Computed compound format token (e.g. "&o&n")
+  const getFormatString = () => {
+    let token = '';
+    if (formats.italic) token += '&o';
+    if (formats.underline) token += '&n';
+    if (formats.strikethrough) token += '&m';
+    return token;
+  };
+
+  // Safe input handlers maintaining system minimum/maximum specs
+  const handleFrameChange = (val: number) => {
+    let checked = Math.max(2, val);
+    if (checked > 100) checked = 100; // Cap at 100 frames max
+    setNumFrames(checked);
+  };
+
+  const handleDelayChange = (val: number) => {
+    let checked = Math.max(1.2, val); // Floor logic at 1.2s minimum
+    setDelay(checked);
+  };
+
+  // Helper insertion function for invisible Unicode payloads
+  const injectSpecialChar = (unicodeStr: string) => {
+    setText(prev => prev + unicodeStr);
+  };
+
+  // Match Python HSL system color configurations
   const hslToHex = (h: number, s: number, l: number): string => {
     const c = (1 - Math.abs(2 * l - 1)) * s;
     const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
@@ -52,12 +84,12 @@ export default function MinescriptGenerator() {
     const rHex = Math.floor((r + m) * 255).toString(16).padStart(2, '0').toUpperCase();
     const gHex = Math.floor((g + m) * 255).toString(16).padStart(2, '0').toUpperCase();
     const bHex = Math.floor((b + m) * 255).toString(16).padStart(2, '0').toUpperCase();
-
     return `#${rHex}${gHex}${bHex}`;
   };
 
-  // Live Generator Hook for the final Python source string
+  // Python text output structural composition calculation
   useEffect(() => {
+    const fmtStr = getFormatString();
     const script = `import minescript
 import time
 
@@ -79,7 +111,7 @@ def hsl_to_hex(h, s, l):
 text       = "${text}"
 NUM_FRAMES = ${numFrames}
 DELAY      = ${delay}
-fmt        = "${format}"  # Structural text modifier
+fmt        = "${fmtStr}"  # Multi-format layer assignment
 
 frames = []
 for frame_i in range(NUM_FRAMES):
@@ -111,18 +143,17 @@ for i, frame in enumerate(frames):
 minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
 
     setGeneratedCode(script);
-  }, [text, numFrames, delay, format, speed]);
+  }, [text, numFrames, delay, formats, speed]);
 
-  // Frame sequencing loop for sandbox visualization
+  // Handle active rendering ticks for DOM visual sandbox
   useEffect(() => {
     const interval = setInterval(() => {
       setPreviewFrame((prev) => (prev + 1) % (numFrames || 1));
-    }, delay * 130);
-
+    }, delay * 110); // Local playback step logic normalized configuration
     return () => clearInterval(interval);
   }, [numFrames, delay]);
 
-  // Generate HTML compilation for DOM simulator string layout
+  // Format visibility preview builder
   useEffect(() => {
     if (!text.length) {
       setPreviewText('');
@@ -139,54 +170,52 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
 
     let textStructure = '';
     for (let i = 0; i < text.length; i++) {
-      const isItalic = format.includes('&o');
-      const isUnderline = format.includes('&n');
+      // Decode hidden characters visually inside our UI matrix so they are discoverable
+      let charDisplay = text[i];
+      let isSpecial = false;
+      
+      if (charDisplay === '\u200C') { charDisplay = '❲ZWNJ❳'; isSpecial = true; }
+      else if (charDisplay === '\u200B') { charDisplay = '❲ZWSP❳'; isSpecial = true; }
+      else if (charDisplay === '\u2060') { charDisplay = '❲WJ❳'; isSpecial = true; }
+
       const styles = `
-        color: ${color}; 
-        font-weight: ${i === k_pos ? 'bold' : 'normal'}; 
-        font-style: ${isItalic ? 'italic' : 'normal'};
-        text-decoration: ${isUnderline ? 'underline' : 'none'};
-        display: inline-block;
-        transition: color 0.05s ease;
+        color: ${isSpecial ? '#666666' : color};
+        font-size: ${isSpecial ? '10px' : 'inherit'};
+        font-weight: ${i === k_pos && !isSpecial ? 'bold' : 'normal'}; 
+        font-style: ${formats.italic && !isSpecial ? 'italic' : 'normal'};
+        text-decoration: ${formats.underline && !isSpecial ? 'underline' : formats.strikethrough && !isSpecial ? 'line-through' : 'none'};
+        padding: ${isSpecial ? '0 2px' : '0'};
       `;
-      textStructure += `<span style="${styles}">${text[i]}</span>`;
+      textStructure += `<span style="${styles}">${charDisplay}</span>`;
     }
     setPreviewText(textStructure);
-  }, [previewFrame, text, numFrames, speed, format]);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generatedCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  }, [previewFrame, text, numFrames, speed, formats]);
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#E5E5E5] p-6 flex flex-col items-center justify-center selection:bg-[#252525]" style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
       <div className="w-full max-w-4xl space-y-8">
         
-        {/* Top Navbar Section */}
+        {/* Navbar */}
         <header className="border-b border-[#1A1A1A] pb-5 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-white flex items-center gap-2">
-              <IconTerminal /> Minescript Prefix Engine
+              <IconTerminal /> Minescript Engine Matrix
             </h1>
-            <p className="text-xs text-neutral-500 mt-1">Minimalist template configuration & execution matrix.</p>
-          </div>
-          <div className="flex items-center gap-2 text-xs bg-[#121212] border border-[#1A1A1A] px-3 py-1.5 rounded text-neutral-400">
-            <IconSparkles /> Vercel Deployment Stable
+            <p className="text-xs text-neutral-500 mt-1">Configurator optimized for custom structures and invisible padding rules.</p>
           </div>
         </header>
 
-        {/* Dashboard Grid Workspace */}
+        {/* Workspace Panels */}
         <main className="grid grid-cols-1 md:grid-cols-12 gap-8">
           
-          {/* Settings Matrix Column */}
+          {/* Controls Segment */}
           <section className="md:col-span-5 space-y-5">
             <div className="flex items-center gap-2 text-sm font-medium text-white mb-2">
-              <IconSettings /> Configuration Parameters
+              <IconSettings /> Configuration Matrix
             </div>
             
             <div className="space-y-4 bg-[#121212] p-5 rounded border border-[#1A1A1A]">
+              {/* String Input */}
               <div>
                 <label className="block text-xs font-medium text-neutral-400 mb-1.5">Prefix Plain Text</label>
                 <input 
@@ -197,60 +226,117 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                 />
               </div>
 
+              {/* Invisible Character Injection Toolbar */}
+              <div>
+                <label className="block text-xs font-medium text-neutral-400 mb-1.5">Inject Invisible Unicode Characters</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button 
+                    onClick={() => injectSpecialChar('\u200C')}
+                    className="bg-[#181818] border border-[#252525] hover:border-neutral-500 px-2 py-1.5 text-[10px] rounded text-neutral-300 transition-colors text-center"
+                    title="Zero Width Non-Joiner"
+                  >
+                    + ZWNJ
+                  </button>
+                  <button 
+                    onClick={() => injectSpecialChar('\u200B')}
+                    className="bg-[#181818] border border-[#252525] hover:border-neutral-500 px-2 py-1.5 text-[10px] rounded text-neutral-300 transition-colors text-center"
+                    title="Zero Width Space"
+                  >
+                    + ZWSP
+                  </button>
+                  <button 
+                    onClick={() => injectSpecialChar('\u2060')}
+                    className="bg-[#181818] border border-[#252525] hover:border-neutral-500 px-2 py-1.5 text-[10px] rounded text-neutral-300 transition-colors text-center"
+                    title="Word Joiner"
+                  >
+                    + WJ
+                  </button>
+                </div>
+              </div>
+
+              {/* Numerical Control Matrix */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-neutral-400 mb-1.5">Total Frames</label>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-medium text-neutral-400">Total Frames</label>
+                    <span className="text-[10px] text-neutral-600">Max 100</span>
+                  </div>
                   <input 
                     type="number" 
                     value={numFrames} 
-                    onChange={(e) => setNumFrames(Math.max(2, parseInt(e.target.value) || 0))}
+                    max={100}
+                    onChange={(e) => handleFrameChange(parseInt(e.target.value) || 0)}
                     className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-neutral-400 mb-1.5">Delay (Seconds)</label>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-medium text-neutral-400">Delay (Sec)</label>
+                    <span className="text-[10px] text-neutral-600">Min 1.2</span>
+                  </div>
                   <input 
                     type="number" 
                     step="0.1" 
-                    value={delay} 
-                    onChange={(e) => setDelay(Math.max(0.01, parseFloat(e.target.value) || 0))}
+                    value={delay}
+                    onChange={(e) => handleDelayChange(parseFloat(e.target.value) || 0)}
                     className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-neutral-400 mb-1.5">Bounce Speed</label>
-                  <input 
-                    type="number" 
-                    value={speed} 
-                    onChange={(e) => setSpeed(Math.max(1, parseInt(e.target.value) || 0))}
-                    className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-neutral-400 mb-1.5">Format Token</label>
-                  <select 
-                    value={format} 
-                    onChange={(e) => setFormat(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors appearance-none"
-                  >
-                    <option value="&o">Italic (&amp;o)</option>
-                    <option value="&n">Underline (&amp;n)</option>
-                    <option value="">None</option>
-                  </select>
+              {/* Bounce Velocity Input */}
+              <div>
+                <label className="block text-xs font-medium text-neutral-400 mb-1.5">Bounce Animation Speed</label>
+                <input 
+                  type="number" 
+                  value={speed} 
+                  onChange={(e) => setSpeed(Math.max(1, parseInt(e.target.value) || 0))}
+                  className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
+                />
+              </div>
+
+              {/* Multi-Format Block Option Layers */}
+              <div className="pt-2 border-t border-[#1A1A1A]">
+                <label className="block text-xs font-medium text-neutral-400 mb-2">Active Format Code Layers</label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-xs text-neutral-300 cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={formats.italic}
+                      onChange={(e) => setFormats(prev => ({...prev, italic: e.target.checked}))}
+                      className="accent-neutral-500 rounded bg-[#181818] border-[#252525]"
+                    />
+                    <span>Italic Code (<span className="text-neutral-500">&amp;o</span>)</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-neutral-300 cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={formats.underline}
+                      onChange={(e) => setFormats(prev => ({...prev, underline: e.target.checked}))}
+                      className="accent-neutral-500 rounded bg-[#181818] border-[#252525]"
+                    />
+                    <span>Underline Code (<span className="text-neutral-500">&amp;n</span>)</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-neutral-300 cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={formats.strikethrough}
+                      onChange={(e) => setFormats(prev => ({...prev, strikethrough: e.target.checked}))}
+                      className="accent-neutral-500 rounded bg-[#181818] border-[#252525]"
+                    />
+                    <span>Strikethrough Code (<span className="text-neutral-500">&amp;m</span>)</span>
+                  </label>
                 </div>
               </div>
             </div>
 
-            {/* Sandbox Render Simulator Viewport */}
+            {/* Live Visual Sandbox Terminal Rendering */}
             <div className="bg-[#121212] p-5 rounded border border-[#1A1A1A] space-y-3">
               <div className="flex items-center justify-between text-xs font-medium text-neutral-400">
-                <span className="flex items-center gap-1.5">Terminal Preview Matrix</span>
+                <span className="flex items-center gap-1.5"><IconEye /> Realtime Sandbox Monitor</span>
                 <span className="text-neutral-600 font-mono">F: {previewFrame + 1}/{numFrames}</span>
               </div>
-              <div className="bg-black/40 border border-[#1A1A1A] p-4 rounded text-center font-mono tracking-wider h-14 flex items-center justify-center text-lg">
+              <div className="bg-black/40 border border-[#1A1A1A] p-4 rounded text-center font-mono tracking-wider h-14 flex items-center justify-center text-lg overflow-hidden">
                 <div dangerouslySetInnerHTML={{ __html: previewText || '...' }} />
               </div>
             </div>
@@ -259,7 +345,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
           {/* Compiled Output Artifact Column */}
           <section className="md:col-span-7 flex flex-col space-y-2">
             <div className="flex items-center justify-between text-sm font-medium text-white mb-1">
-              <span className="flex items-center gap-2"><IconCode /> Generated Python Executable</span>
+              <span className="flex items-center gap-2"><IconCode /> Generated Script Output</span>
               <button 
                 onClick={handleCopy}
                 className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white bg-[#121212] hover:bg-[#1A1A1A] border border-[#1A1A1A] px-2.5 py-1 rounded transition-all active:scale-[0.98]"
@@ -272,13 +358,13 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                 ) : (
                   <>
                     <IconCopy />
-                    <span>Copy Code</span>
+                    <span>Copy Script</span>
                   </>
                 )}
               </button>
             </div>
 
-            <div className="flex-1 bg-[#121212] border border-[#1A1A1A] rounded p-4 font-mono text-xs overflow-auto max-h-[410px] text-neutral-300 leading-relaxed">
+            <div className="flex-1 bg-[#121212] border border-[#1A1A1A] rounded p-4 font-mono text-xs overflow-auto max-h-[490px] text-neutral-300 leading-relaxed custom-scrollbar">
               <pre className="whitespace-pre">{generatedCode}</pre>
             </div>
           </section>
@@ -286,7 +372,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
         </main>
 
         <footer className="text-center text-[11px] text-neutral-600 pt-4 border-t border-[#1A1A1A]">
-          Execute locally within your Minecraft environment containing the valid Python framework extension.
+          Ensure your native implementation framework accommodates raw Unicode multi-byte characters accurately.
         </footer>
       </div>
     </div>
