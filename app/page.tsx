@@ -2,12 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 
-// --- CUSTOM SVG VECTOR GRAPHICS ---
-const IconTerminal = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-);
+// --- ICONS ---
 const IconSettings = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15-.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
 );
 const IconCode = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
@@ -34,39 +31,39 @@ const IconExternalLink = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
 );
 
-export default function Abus3Workspace() {
+export default function Abus3App() {
   const [currentTab, setCurrentTab] = useState<'home' | 'generator' | 'plugins' | 'credits'>('home');
 
-  // Input states for builder dashboard
+  // Input states
   const [prefixText, setPrefixText] = useState('ABUS3');
   const [totalFrames, setTotalFrames] = useState(64);
   const [animationDelay, setAnimationDelay] = useState(1.5);
   const [animationSpeed, setAnimationSpeed] = useState(3);
   const [textFormats, setTextFormats] = useState({ italic: false, underline: false, strikethrough: false });
 
-  // Output strings
+  // Output and preview updates
   const [outputCode, setOutputCode] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [currentPreviewFrame, setCurrentPreviewFrame] = useState(0);
   const [previewHtmlString, setPreviewHtmlString] = useState('');
 
   const assembleFormattingCodes = () => {
-    let codeString = '';
-    if (textFormats.italic) codeString += '&o';
-    if (textFormats.underline) codeString += '&n';
-    if (textFormats.strikethrough) codeString += '&m';
-    return codeString;
+    let formatting = '';
+    if (textFormats.italic) formatting += '&o';
+    if (textFormats.underline) formatting += '&n';
+    if (textFormats.strikethrough) formatting += '&m';
+    return formatting;
   };
 
-  const handleFrameChange = (newValue: number) => {
-    let validatedValue = Math.max(2, newValue);
-    if (validatedValue > 100) validatedValue = 100;
-    setTotalFrames(validatedValue);
+  const handleFrameChange = (val: number) => {
+    let corrected = Math.max(2, val);
+    if (corrected > 100) corrected = 100;
+    setTotalFrames(corrected);
   };
 
-  const handleDelayChange = (newValue: number) => {
-    const validatedValue = Math.max(1.2, parseFloat(newValue.toFixed(1)) || 1.2);
-    setAnimationDelay(validatedValue);
+  const handleDelayChange = (val: number) => {
+    const corrected = Math.max(1.2, parseFloat(val.toFixed(1)) || 1.2);
+    setAnimationDelay(corrected);
   };
 
   const executeClipboardCopy = () => {
@@ -75,29 +72,30 @@ export default function Abus3Workspace() {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleCharacterInjection = (character: string) => {
-    setPrefixText(previousString => previousString + character);
+  const handleCharacterInjection = (char: string) => {
+    setPrefixText(prev => prev + char);
   };
 
-  const calculateHslColor = (hueValue: number, saturation: number, lightness: number): string => {
-    const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
-    const secondaryComponent = chroma * (1 - Math.abs(((hueValue / 60) % 2) - 1));
-    const baselineBrightness = lightness - chroma / 2;
+  const calculateHslColor = (h: number, s: number, l: number): string => {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
     let r = 0, g = 0, b = 0;
 
-    if (hueValue < 60) { r = chroma; g = secondaryComponent; b = 0; }
-    else if (hueValue < 120) { r = secondaryComponent; g = chroma; b = 0; }
-    else if (hueValue < 180) { r = 0; g = chroma; b = secondaryComponent; }
-    else if (hueValue < 240) { r = 0; g = secondaryComponent; b = chroma; }
-    else if (hueValue < 300) { r = secondaryComponent; g = 0; b = chroma; }
-    else { r = chroma; g = 0; b = secondaryComponent; }
+    if (h < 60) { r = c; g = x; b = 0; }
+    else if (h < 120) { r = x; g = c; b = 0; }
+    else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; }
+    else if (h < 300) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
 
-    const hexRed = Math.floor((r + baselineBrightness) * 255).toString(16).padStart(2, '0').toUpperCase();
-    const hexGreen = Math.floor((g + baselineBrightness) * 255).toString(16).padStart(2, '0').toUpperCase();
-    const hexBlue = Math.floor((b + baselineBrightness) * 255).toString(16).padStart(2, '0').toUpperCase();
-    return `#${hexRed}${hexGreen}${hexBlue}`;
+    const hexR = Math.floor((r + m) * 255).toString(16).padStart(2, '0').toUpperCase();
+    const hexG = Math.floor((g + m) * 255).toString(16).padStart(2, '0').toUpperCase();
+    const hexB = Math.floor((b + m) * 255).toString(16).padStart(2, '0').toUpperCase();
+    return `#${hexR}${hexG}${hexB}`;
   };
 
+  // Re-build python file when inputs change
   useEffect(() => {
     const formatTags = assembleFormattingCodes();
     const scriptTemplate = `import minescript
@@ -154,53 +152,55 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
     setOutputCode(scriptTemplate);
   }, [prefixText, totalFrames, animationDelay, textFormats, animationSpeed]);
 
+  // Run live animation steps
   useEffect(() => {
-    const playTicker = setInterval(() => {
-      setCurrentPreviewFrame((previousFrame) => (previousFrame + 1) % (totalFrames || 1));
+    const interval = setInterval(() => {
+      setCurrentPreviewFrame((prev) => (prev + 1) % (totalFrames || 1));
     }, animationDelay * 110);
-    return () => clearInterval(playTicker);
+    return () => clearInterval(interval);
   }, [totalFrames, animationDelay]);
 
+  // Generate preview text elements
   useEffect(() => {
     if (!prefixText.length) {
       setPreviewHtmlString('');
       return;
     }
-    const safeFrameIndex = currentPreviewFrame % (totalFrames || 1);
-    const normalizedProgress = safeFrameIndex / ((totalFrames - 1) || 1);
-    const waveProgress = 1 - Math.abs(2 * normalizedProgress - 1);
-    const targetHexColor = calculateHslColor(waveProgress * 300, 1.0, 0.5);
+    const safeIdx = currentPreviewFrame % (totalFrames || 1);
+    const progress = safeIdx / ((totalFrames - 1) || 1);
+    const waveProgress = 1 - Math.abs(2 * progress - 1);
+    const hexColor = calculateHslColor(waveProgress * 300, 1.0, 0.5);
 
-    const animationWaveValue = (safeFrameIndex * animationSpeed / ((totalFrames - 1) || 1)) % 2.0;
-    const waveBouncePosition = 1 - Math.abs(animationWaveValue - 1);
-    const illuminatedCharIndex = Math.floor(waveBouncePosition * (prefixText.length - 0.001));
+    const waveValue = (safeIdx * animationSpeed / ((totalFrames - 1) || 1)) % 2.0;
+    const bouncePos = 1 - Math.abs(waveValue - 1);
+    const litCharIdx = Math.floor(bouncePos * (prefixText.length - 0.001));
 
-    let constructedHtml = '';
-    for (let loopIndex = 0; loopIndex < prefixText.length; loopIndex++) {
-      let activeCharacter = prefixText[loopIndex];
-      let hasSpecialFormat = false;
+    let html = '';
+    for (let i = 0; i < prefixText.length; i++) {
+      let char = prefixText[i];
+      let hasFormat = false;
       
-      if (activeCharacter === '\u200C') { activeCharacter = '❲ZWNJ❳'; hasSpecialFormat = true; }
-      else if (activeCharacter === '\u200B') { activeCharacter = '❲ZWSP❳'; hasSpecialFormat = true; }
-      else if (activeCharacter === '\u2060') { activeCharacter = '❲WJ❳'; hasSpecialFormat = true; }
+      if (char === '\u200C') { char = '❲ZWNJ❳'; hasFormat = true; }
+      else if (char === '\u200B') { char = '❲ZWSP❳'; hasFormat = true; }
+      else if (char === '\u2060') { char = '❲WJ❳'; hasFormat = true; }
 
       const elementStyles = `
-        color: ${hasSpecialFormat ? '#555555' : targetHexColor};
-        font-size: ${hasSpecialFormat ? '10px' : 'inherit'};
-        font-weight: ${loopIndex === illuminatedCharIndex && !hasSpecialFormat ? 'bold' : 'normal'}; 
-        font-style: ${textFormats.italic && !hasSpecialFormat ? 'italic' : 'normal'};
-        text-decoration: ${textFormats.underline && !hasSpecialFormat ? 'underline' : textFormats.strikethrough && !hasSpecialFormat ? 'line-through' : 'none'};
-        padding: ${hasSpecialFormat ? '0 2px' : '0'};
+        color: ${hasFormat ? '#555555' : hexColor};
+        font-size: ${hasFormat ? '10px' : 'inherit'};
+        font-weight: ${i === litCharIdx && !hasFormat ? 'bold' : 'normal'}; 
+        font-style: ${textFormats.italic && !hasFormat ? 'italic' : 'normal'};
+        text-decoration: ${textFormats.underline && !hasFormat ? 'underline' : textFormats.strikethrough && !hasFormat ? 'line-through' : 'none'};
+        padding: ${hasFormat ? '0 2px' : '0'};
       `;
-      constructedHtml += `<span style="${elementStyles}">${activeCharacter}</span>`;
+      html += `<span style="${elementStyles}">${char}</span>`;
     }
-    setPreviewHtmlString(constructedHtml);
+    setPreviewHtmlString(html);
   }, [currentPreviewFrame, prefixText, totalFrames, animationSpeed, textFormats]);
 
   return (
     <div className="min-h-screen bg-[#050505] text-[#C5C5C5] flex flex-col selection:bg-[#202020]" style={{ fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       
-      {/* Scrollbar & Global CSS Animations */}
+      {/* Scrollbars and Fades */}
       <style dangerouslySetInnerHTML={{__html: `
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: #080808; }
@@ -210,52 +210,43 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         @keyframes viewFadeIn { from { opacity: 0; transform: scale(0.995) translateY(2px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         @keyframes wrapperSlideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slowGlowPulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.25; } }
-        .animate-view-fade { animation: viewFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-wrapper-slide { animation: wrapperSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-glow-pulse { animation: slowGlowPulse 4s ease-in-out infinite; }
+        .animate-view-fade { animation: viewFadeIn 0.3s ease forwards; }
+        .animate-wrapper-slide { animation: wrapperSlideUp 0.5s ease forwards; }
       `}} />
 
-      {/* TOP NAVBAR NAVIGATION HEADER */}
-      <nav className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-md border-b border-[#121212] px-6 h-14 flex items-center justify-between shrink-0">
+      {/* TOP BAR */}
+      <nav className="sticky top-0 z-50 bg-[#050505]/85 backdrop-blur-md border-b border-[#121212] px-6 h-14 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentTab('home')}>
-          <div className="w-5 h-5 rounded bg-white flex items-center justify-center text-black font-mono font-bold text-xs shadow-sm">A</div>
+          <div className="w-5 h-5 rounded bg-white flex items-center justify-center text-black font-mono font-bold text-xs">A</div>
           <span className="text-sm font-semibold tracking-tight text-[#EDEDED]">Abus3</span>
         </div>
         
         <div className="flex items-center gap-1">
-          {(['home', 'generator', 'plugins', 'credits'] as const).map((tabName) => (
+          {(['home', 'generator', 'plugins', 'credits'] as const).map((tab) => (
             <button
-              key={tabName}
+              key={tab}
               type="button"
-              onClick={() => setCurrentTab(tabName)}
-              className={`text-xs px-3 py-1.5 rounded font-medium capitalize tracking-wide transition-all ${currentTab === tabName ? 'bg-[#121212] text-white border border-[#1f1f1f]' : 'text-neutral-500 hover:text-neutral-200 border border-transparent'}`}
+              onClick={() => setCurrentTab(tab)}
+              className={`text-xs px-3 py-1.5 rounded font-medium capitalize tracking-wide transition-all ${currentTab === tab ? 'bg-[#121212] text-white border border-[#1f1f1f]' : 'text-neutral-500 hover:text-neutral-200 border border-transparent'}`}
             >
-              {tabName === 'generator' ? 'Prefix Dashboard' : tabName === 'plugins' ? 'Our Plugins' : tabName}
+              {tab === 'generator' ? 'Prefix Dashboard' : tab === 'plugins' ? 'Plugins' : tab}
             </button>
           ))}
         </div>
       </nav>
 
-      {/* RENDER CONTENT SECTION CONTAINER */}
       <div className="flex-1 flex flex-col relative overflow-hidden">
         
-        {/* TAB 1: WEBSITE HOME PAGE */}
+        {/* TAB 1: HOME PAGE (CLEAN LAYOUT) */}
         {currentTab === 'home' && (
-          <div className="flex-1 max-w-4xl w-full mx-auto px-6 flex flex-col justify-center py-12 relative animate-wrapper-slide">
-            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-neutral-800/10 rounded-full blur-[120px] pointer-events-none animate-glow-pulse" />
-            
-            <div className="space-y-10 text-center md:text-left max-w-2xl">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#0d0d0d] border border-[#161616] text-[11px] font-medium tracking-wide text-neutral-400 uppercase">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> Live Client Utilities
-                </div>
+          <div className="flex-1 max-w-4xl w-full mx-auto px-6 flex flex-col justify-center py-12 animate-wrapper-slide">
+            <div className="space-y-8 text-center md:text-left max-w-xl">
+              <div className="space-y-3">
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
-                  Elevate Your In-Game Layouts <br />
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">With Abus3 Toolkits</span>
+                  Make your chat layout stand out.
                 </h1>
-                <p className="text-sm text-neutral-500 leading-relaxed max-w-xl mx-auto md:mx-0">
-                  Welcome to Abus3. A project created to build colorized formatting arrays alongside modular script enhancements for client interfaces.
+                <p className="text-sm text-neutral-500 leading-relaxed">
+                  Abus3 lets you generate clean, animated formatting strings and python scripts to customize text layouts.
                 </p>
               </div>
 
@@ -270,9 +261,9 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                 <button
                   type="button"
                   onClick={() => setCurrentTab('plugins')}
-                  className="w-full sm:w-auto bg-[#0d0d0d] hover:bg-[#121212] border border-[#1c1c1c] hover:border-neutral-700 text-neutral-300 text-xs font-semibold px-5 py-2.5 rounded transition-all active:scale-[0.98]"
+                  className="w-full sm:w-auto bg-[#0d0d0d] hover:bg-[#121212] border border-[#1c1c1c] text-neutral-300 text-xs font-semibold px-5 py-2.5 rounded transition-all active:scale-[0.98]"
                 >
-                  Download Our Plugins
+                  Get Plugins
                 </button>
               </div>
             </div>
@@ -282,47 +273,49 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
         {/* TAB 2: PREFIX BUILDER (FULL EXPANDED DASHBOARD) */}
         {currentTab === 'generator' && (
           <div className="flex-1 flex flex-col w-full h-full animate-view-fade bg-[#070707]">
-            {/* Dashboard Subheader Controls Row */}
-            <div className="h-12 border-b border-[#121212] bg-[#090909] px-6 flex items-center justify-between text-xs text-neutral-500 shrink-0">
+            
+            {/* Dashboard Workspace Titlebar */}
+            <div className="h-12 border-b border-[#121212] bg-[#090909] px-6 flex items-center justify-between text-xs text-neutral-500 shrink-0 font-mono">
               <div className="flex items-center gap-3">
-                <span className="font-mono text-white font-bold tracking-wider">WORKSPACE // PREFIX_ENGINE</span>
+                <span className="text-white font-bold tracking-wider">EDITING: PREFIX_ENGINE</span>
                 <span className="w-px h-3 bg-[#1c1c1c]" />
-                <span className="hidden sm:inline">Active Output Buffer: Standard Compiled</span>
+                <span className="hidden sm:inline">Output: Standard Code</span>
               </div>
-              <div className="font-mono flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> SYSTEM STATUS: READY
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Live
               </div>
             </div>
 
-            {/* Dashboard Workspace Layout Split */}
+            {/* Dashboard Main Viewport */}
             <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 gap-6 p-6 overflow-y-auto custom-scroll">
               
-              {/* Controls Column Sidebar */}
+              {/* Left Settings Sidebar */}
               <section className="xl:col-span-5 space-y-4 flex flex-col justify-start">
-                {/* Micro metrics panel */}
+                
+                {/* Stats row */}
                 <div className="grid grid-cols-3 gap-2 shrink-0">
                   <div className="p-2.5 bg-[#0a0a0a] border border-[#141414] rounded">
-                    <div className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold">Target Text</div>
-                    <div className="text-xs font-mono font-bold text-white mt-0.5 truncate">{prefixText || 'None'}</div>
+                    <div className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold">Text String</div>
+                    <div className="text-xs font-mono font-bold text-white mt-0.5 truncate">{prefixText || 'Empty'}</div>
                   </div>
                   <div className="p-2.5 bg-[#0a0a0a] border border-[#141414] rounded">
-                    <div className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold">Total Frames</div>
+                    <div className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold">Frames</div>
                     <div className="text-xs font-mono font-bold text-white mt-0.5">{totalFrames}</div>
                   </div>
                   <div className="p-2.5 bg-[#0a0a0a] border border-[#141414] rounded">
-                    <div className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold">Interval Time</div>
+                    <div className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold">Delay</div>
                     <div className="text-xs font-mono font-bold text-white mt-0.5">{animationDelay}s</div>
                   </div>
                 </div>
 
-                {/* Left Controller Parameter inputs wrapper block */}
+                {/* Input Fields Box */}
                 <div className="bg-[#0a0a0a] border border-[#141414] p-5 rounded space-y-4">
                   <div className="text-xs font-semibold tracking-wide text-white flex items-center gap-2">
-                    <IconSettings /> Configuration Grid Matrix
+                    <IconSettings /> Configuration Settings
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Prefix Value String</label>
+                    <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Prefix Text</label>
                     <input 
                       type="text" 
                       value={prefixText} 
@@ -332,7 +325,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Hidden Byte Space Injections</label>
+                    <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Add Hidden Spaces</label>
                     <div className="grid grid-cols-3 gap-1">
                       { [['\u200C', 'ZWNJ'], ['\u200B', 'ZWSP'], ['\u2060', 'WJ']].map(([character, labelName]) => (
                         <button 
@@ -349,7 +342,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Max Frames</label>
+                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Total Frames</label>
                       <div className="relative flex items-center bg-[#030303] border border-[#1c1c1c] rounded focus-within:border-neutral-600 transition-all">
                         <input type="number" value={totalFrames} onChange={(e) => handleFrameChange(parseInt(e.target.value) || 0)} className="w-full bg-transparent px-3 py-1.5 text-xs text-white focus:outline-none" />
                         <div className="flex flex-col border-l border-[#1c1c1c] h-full">
@@ -360,7 +353,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Interval Step</label>
+                      <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Delay Rate</label>
                       <div className="relative flex items-center bg-[#030303] border border-[#1c1c1c] rounded focus-within:border-neutral-600 transition-all">
                         <input type="number" step="0.1" value={animationDelay} onChange={(e) => handleDelayChange(parseFloat(e.target.value) || 0)} className="w-full bg-transparent px-3 py-1.5 text-xs text-white focus:outline-none" />
                         <div className="flex flex-col border-l border-[#1c1c1c] h-full">
@@ -372,7 +365,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Wave Cycle SpeedMultiplier</label>
+                    <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Wave Speed</label>
                     <div className="relative flex items-center bg-[#030303] border border-[#1c1c1c] rounded focus-within:border-neutral-600 transition-all">
                       <input type="number" value={animationSpeed} onChange={(e) => setAnimationSpeed(Math.max(1, parseInt(e.target.value) || 0))} className="w-full bg-transparent px-3 py-1.5 text-xs text-white focus:outline-none" />
                       <div className="flex flex-col border-l border-[#1c1c1c] h-full">
@@ -383,24 +376,24 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                   </div>
 
                   <div className="pt-2 border-t border-[#141414]">
-                    <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">Style Code Filters</label>
+                    <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">Style Flags</label>
                     <div className="space-y-2">
-                      {(Object.keys(textFormats) as Array<keyof typeof textFormats>).map((formatKey) => (
-                        <div key={formatKey} onClick={() => setTextFormats(prev => ({ ...prev, [formatKey]: !prev[formatKey] }))} className="flex items-center gap-3 cursor-pointer group select-none py-0.5">
-                          <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${textFormats[formatKey] ? 'bg-white border-white text-black' : 'bg-transparent border-[#222] group-hover:border-neutral-500'}`}>
-                            {textFormats[formatKey] && <div className="w-1.5 h-1.5 bg-black rounded-sm" />}
+                      {(Object.keys(textFormats) as Array<keyof typeof textFormats>).map((key) => (
+                        <div key={key} onClick={() => setTextFormats(prev => ({ ...prev, [key]: !prev[key] }))} className="flex items-center gap-3 cursor-pointer group select-none py-0.5">
+                          <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-all ${textFormats[key] ? 'bg-white border-white text-black' : 'bg-transparent border-[#222] group-hover:border-neutral-500'}`}>
+                            {textFormats[key] && <div className="w-1.5 h-1.5 bg-black rounded-sm" />}
                           </div>
-                          <span className="text-xs text-neutral-400 group-hover:text-neutral-200 transition-colors capitalize">{formatKey}</span>
+                          <span className="text-xs text-neutral-400 group-hover:text-neutral-200 transition-colors capitalize">{key}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                {/* Dashboard active sandbox screen rendering module */}
+                {/* Preview Window Panel */}
                 <div className="bg-[#0a0a0a] border border-[#141414] p-4 rounded space-y-2.5">
                   <div className="flex items-center justify-between text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                    <span className="flex items-center gap-1.5"><IconEye /> Console Output Preview</span>
+                    <span className="flex items-center gap-1.5"><IconEye /> Real-Time Preview</span>
                     <span className="text-neutral-600 font-mono">Frame: {currentPreviewFrame + 1}/{totalFrames}</span>
                   </div>
                   <div className="bg-[#030303] border border-[#121212] p-3 rounded text-center font-mono h-12 flex items-center justify-center text-sm overflow-hidden select-none">
@@ -409,10 +402,10 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
                 </div>
               </section>
 
-              {/* Expanded Data Output Script Area Column */}
+              {/* Right Output Script Box */}
               <section className="xl:col-span-7 flex flex-col space-y-2 min-h-[350px]">
                 <div className="flex items-center justify-between text-[10px] font-bold text-neutral-500 uppercase tracking-wider pl-1">
-                  <span className="flex items-center gap-2"><IconCode /> Auto-Assembled Python Script Block</span>
+                  <span className="flex items-center gap-2"><IconCode /> Python Script Output</span>
                   <button type="button" onClick={executeClipboardCopy} className="flex items-center gap-1.5 text-[10px] text-neutral-400 hover:text-white bg-[#0a0a0a] border border-[#141414] px-3 py-1 rounded transition-all hover:border-neutral-500 active:scale-95">
                     {isCopied ? <><IconCheck /><span className="text-neutral-300">Copied</span></> : <><IconCopy /><span>Copy Code</span></>}
                   </button>
@@ -426,30 +419,30 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
           </div>
         )}
 
-        {/* TAB 3: PLUGINS DOWNLOAD WE MADE PAGE */}
+        {/* TAB 3: PLUGINS DOWNLOAD PAGE */}
         {currentTab === 'plugins' && (
-          <div className="flex-1 max-w-2xl w-full mx-auto px-6 flex flex-col justify-center py-12 animate-wrapper-slide">
+          <div className="flex-1 max-w-2xl w-full mx-auto px-6 flex flex-col justify-center py-12">
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold tracking-tight text-white">Plugins Ecosystem Hub</h2>
-                <p className="text-xs text-neutral-500 mt-0.5">Production-ready binary files tailored for processing custom message buffers.</p>
+                <h2 className="text-xl font-bold tracking-tight text-white">Plugins</h2>
+                <p className="text-xs text-neutral-500 mt-0.5">Files you can download to parse layout updates.</p>
               </div>
 
               <div className="grid grid-cols-1 gap-4">
-                <div className="bg-[#0c0c0c] border border-[#141414] hover:border-[#1f1f1f] p-5 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-300 group">
+                <div className="bg-[#0c0c0c] border border-[#141414] p-5 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-white tracking-tight">Abus3Core Custom Hook Extension</span>
+                      <span className="text-xs font-semibold text-white">Abus3-Core-Plugin</span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#161616] border border-[#222] font-mono text-neutral-400">v1.4.0</span>
                     </div>
                     <p className="text-xs text-neutral-500 max-w-md leading-relaxed">
-                      Optimizes packet buffer parsing routines instantly. Includes out-of-the-box structural translation mapping filters for blank padding fields.
+                      Handles standard text formats and sets up formatting filters for hidden space characters.
                     </p>
                   </div>
                   <div>
                     <a 
                       href="#" 
-                      className="inline-flex items-center gap-2 bg-white hover:bg-neutral-200 text-black text-xs font-semibold px-4 py-2 rounded transition-all group-hover:translate-x-0.5"
+                      className="inline-flex items-center gap-2 bg-white hover:bg-neutral-200 text-black text-xs font-semibold px-4 py-2 rounded transition-all"
                       onClick={(e) => e.preventDefault()}
                     >
                       <IconDownload /> Download .JAR
@@ -461,29 +454,29 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
           </div>
         )}
 
-        {/* TAB 4: CREDITS PAGE ROSTER */}
+        {/* TAB 4: CREDITS PAGE */}
         {currentTab === 'credits' && (
-          <div className="flex-1 max-w-xl w-full mx-auto px-6 flex flex-col justify-center py-12 relative animate-wrapper-slide">
+          <div className="flex-1 max-w-xl w-full mx-auto px-6 flex flex-col justify-center py-12">
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold tracking-tight text-white">System Architecture Credits</h2>
-                <p className="text-xs text-neutral-500 mt-0.5">Core components and third-party dependencies used to build Abus3.</p>
+                <h2 className="text-xl font-bold tracking-tight text-white">Credits</h2>
+                <p className="text-xs text-neutral-500 mt-0.5">Tools used to construct this workspace.</p>
               </div>
 
               <div className="bg-[#0c0c0c] border border-[#141414] rounded divide-y divide-[#141414]">
                 <div className="p-4 flex items-center justify-between text-xs">
-                  <span className="font-semibold text-neutral-300">Layout Interface Design</span>
-                  <span className="text-neutral-500 font-mono">Abus3 Front-End Architecture Team</span>
+                  <span className="font-semibold text-neutral-300">Front-end Work</span>
+                  <span className="text-neutral-500 font-mono">Abus3 Team</span>
                 </div>
                 <div className="p-4 flex items-center justify-between text-xs">
-                  <span className="font-semibold text-neutral-300">Minescript Core API Engine</span>
+                  <span className="font-semibold text-neutral-300">Minescript API Link</span>
                   <a href="https://github.com/mcaron/minescript" target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-white flex items-center gap-1 transition-colors">
                     mcaron / minescript <IconExternalLink />
                   </a>
                 </div>
                 <div className="p-4 flex items-center justify-between text-xs">
-                  <span className="font-semibold text-neutral-300">Styling System Utility Wrapper</span>
-                  <span className="text-neutral-500 font-mono">Tailwind Compiler Spec CSS Blueprint</span>
+                  <span className="font-semibold text-neutral-300">Styling</span>
+                  <span className="text-neutral-500 font-mono">Tailwind CSS</span>
                 </div>
               </div>
             </div>
@@ -493,8 +486,8 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
       </div>
 
       {/* FOOTER */}
-      <footer className="h-10 text-center text-[10px] text-neutral-700 border-t border-[#121212] tracking-wider uppercase flex items-center justify-center bg-[#050505] shrink-0 z-10">
-        Abus3 Development Terminal Console Network
+      <footer className="h-10 text-center text-[10px] text-neutral-700 border-t border-[#121212] flex items-center justify-center bg-[#050505] shrink-0 font-mono">
+        Abus3 Workspace
       </footer>
     </div>
   );
