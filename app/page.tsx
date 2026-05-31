@@ -1,261 +1,259 @@
-"use client";
+import React, { useState, useEffect } from 'react';
+import { Copy, Check, Settings, Code, Sparkles, Terminal, RefreshCw } from 'lucide-react';
 
-import { useState, useEffect } from "react";
+export default function MinescriptGenerator() {
+  // State management for generator configuration
+  const [text, setText] = useState('MINE');
+  const [numFrames, setNumFrames] = useState(100);
+  const [delay, setDelay] = useState(1.2);
+  const [format, setFormat] = useState('&o');
+  const [speed, setSpeed] = useState(2);
+  
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [previewFrame, setPreviewFrame] = useState(0);
+  const [previewText, setPreviewText] = useState('');
 
-type Theme = "dark" | "light" | "system";
-type Tab = "overall" | "tiers";
+  // HSL to HEX helper logic matching the Python backend script logic
+  const hslToHex = (h: number, s: number, l: number): string => {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    let r = 0, g = 0, b = 0;
 
-const PLAYERS = [
-  { rank: 1,  name: "xX_D3str0y3r_Xx", title: "S3rv3r God",    points: 330, region: "NA", tiers: ["HT1","HT1","T1","HT1","T2","T1","LT2","LT1"] },
-  { rank: 2,  name: "v0idCr4ck3r",      title: "S3rv3r God",    points: 326, region: "EU", tiers: ["T1","T1","HT1","T3","LT1","T1","LT2","LT2"] },
-  { rank: 3,  name: "bl00dsh0t99",       title: "S3rv3r God",    points: 290, region: "AS", tiers: ["HT1","T3","T1","HT1","HT1","HT2","LT2","LT2"] },
-  { rank: 4,  name: "N1ghtm4re_PvP",     title: "Expl01t Ace",   points: 260, region: "NA", tiers: ["T3","HT4","HT1","T1","HT1","HT2","LT2","LT2"] },
-  { rank: 5,  name: "Cr1ms0nEdge",       title: "Expl01t Ace",   points: 226, region: "EU", tiers: ["HT2","T3","T3","T3","HT1","HT1","HT2","LT2"] },
-  { rank: 5,  name: "r4v3nStr1ke",       title: "Expl01t Ace",   points: 226, region: "NA", tiers: ["HT3","T3","T3","HT1","HT1","HT1","LT2","-"] },
-  { rank: 7,  name: "gh0stH4nd",         title: "Expl01t Ace",   points: 211, region: "SA", tiers: ["HT1","T3","T1","LT1","LT2","LT2","LT2","LT2"] },
-  { rank: 8,  name: "m3ltd0wn_77",       title: "Expl01t Ace",   points: 186, region: "EU", tiers: ["T3","HT4","HT1","HT1","HT2","LT2","-","-"] },
-  { rank: 9,  name: "sc0rch3dSky",       title: "Byp4ss Artist", points: 177, region: "AS", tiers: ["T3","T3","T3","T3","HT1","T1","LT1","HT2"] },
-  { rank: 10, name: "z3r0_c00l",         title: "Byp4ss Artist", points: 155, region: "NA", tiers: ["T3","T3","HT1","-","T2","T1","LT2","LT2"] },
-];
+    if (h < 60) { r = c; g = x; b = 0; }
+    else if (h < 120) { r = x; g = c; b = 0; }
+    else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; }
+    else if (h < 300) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
 
-const TIER_COLOR: Record<string, { text: string; bg: string }> = {
-  "HT1": { text: "#e07820", bg: "#2e1a00" },
-  "HT2": { text: "#999",    bg: "#202020" },
-  "HT3": { text: "#999",    bg: "#202020" },
-  "HT4": { text: "#999",    bg: "#202020" },
-  "T1":  { text: "#e07820", bg: "#251500" },
-  "T2":  { text: "#999",    bg: "#1e1e1e" },
-  "T3":  { text: "#999",    bg: "#1a1a1a" },
-  "LT1": { text: "#5a9f5a", bg: "#0a180a" },
-  "LT2": { text: "#4080a0", bg: "#081420" },
-  "-":   { text: "#3a3a3a", bg: "#141414" },
-};
+    return `#${Math.floor((r + m) * 255).toString(16).padStart(2, '0').toUpperCase()}${Math.floor((g + m) * 255).toString(16).padStart(2, '0').toUpperCase()}${Math.floor((b + m) * 255).toString(16).padStart(2, '0').toUpperCase()}`;
+  };
 
-const REGION_COLOR: Record<string, string> = {
-  NA: "#b03030", EU: "#3060b0", AS: "#b07030", SA: "#308060", OC: "#7030b0",
-};
-
-const TIER_COLS = [
-  { key: "Adm1n",  headerBg: "#2a1a00", headerBorder: "#a06000", trophy: "🏆", trophyColor: "#d4a017", nameColor: "#d4a017" },
-  { key: "Tier 2", headerBg: "#1c1c24", headerBorder: "#48484e", trophy: "🏆", trophyColor: "#aaa",    nameColor: "#ccc"    },
-  { key: "Tier 3", headerBg: "#221a10", headerBorder: "#7a4a18", trophy: "🏆", trophyColor: "#b07030", nameColor: "#c08040" },
-  { key: "Tier 4", headerBg: "#16171e", headerBorder: "#2e2f3a", trophy: "",   trophyColor: "",        nameColor: "#ccc"    },
-  { key: "Tier 5", headerBg: "#16171e", headerBorder: "#2e2f3a", trophy: "",   trophyColor: "",        nameColor: "#ccc"    },
-];
-
-const TIER_PLAYERS: Record<string, string[]> = {
-  "Adm1n":  ["xX_D3str0y3r_Xx"],
-  "Tier 2": ["v0idCr4ck3r","bl00dsh0t99","N1ghtm4re_PvP","Cr1ms0nEdge","r4v3nStr1ke","gh0stH4nd","m3ltd0wn_77"],
-  "Tier 3": ["sc0rch3dSky","z3r0_c00l","l4mbd4_frz","kn1feW1nd","f4d3dSh4dow","nul1ptr","byt3_cr4sh"],
-  "Tier 4": ["0v3rfl0w","d3adP4ck3t","sp00fM4st3r","r3p34t3r","k1ck3r"],
-  "Tier 5": ["l4g4bus3r","cr4sh3r99","f4k3P1ng","byp4ss_jr","l0w3st"],
-};
-
-function skinHue(name: string) {
-  const n = [...name].reduce((a, c) => a + c.charCodeAt(0), 0);
-  return [200, 20, 140, 270, 55, 310, 175][n % 7];
-}
-
-function Avatar({ name, size = 32 }: { name: string; size?: number }) {
-  return (
-    <div style={{
-      width: size, height: size, borderRadius: 3, flexShrink: 0,
-      background: `hsl(${skinHue(name)},38%,32%)`,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: size * 0.42, fontWeight: 700, color: "rgba(255,255,255,0.7)",
-      userSelect: "none",
-    }}>
-      {name[0].toUpperCase()}
-    </div>
-  );
-}
-
-export default function Home() {
-  const [theme, setTheme] = useState<Theme>("system");
-  const [dk, setDk]       = useState(true);
-  const [tab, setTab]     = useState<Tab>("overall");
-  const [search, setSearch] = useState("");
-  const [region, setRegion] = useState("ALL");
-
+  // Generate Python Script & Live Preview String
   useEffect(() => {
-    if (theme !== "system") { setDk(theme === "dark"); return; }
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    setDk(mq.matches);
-    const h = (e: MediaQueryListEvent) => setDk(e.matches);
-    mq.addEventListener("change", h);
-    return () => mq.removeEventListener("change", h);
-  }, [theme]);
+    // Generate Code template dynamically stringified
+    const script = `import minescript
+import time
 
-  const bg     = dk ? "#13141c" : "#f0f0f2";
-  const bg2    = dk ? "#1a1b24" : "#e6e6ea";
-  const border = dk ? "#2a2b38" : "#d0d0d8";
-  const text   = dk ? "#dddde8" : "#111118";
-  const muted  = dk ? "#52536a" : "#9090a0";
-  const hover  = dk ? "#1e1f2a" : "#e8e8f0";
+def hsl_to_hex(h, s, l):
+    c = (1 - abs(2 * l - 1)) * s
+    x = c * (1 - abs((h / 60) % 2 - 1))
+    m = l - c / 2
+    if h < 60:    r, g, b = c, x, 0
+    elif h < 120: r, g, b = x, c, 0
+    elif h < 180: r, g, b = 0, c, x
+    elif h < 240: r, g, b = 0, x, c
+    elif h < 300: r, g, b = x, 0, c
+    else:         r, g, b = c, 0, x
+    r = int((r + m) * 255)
+    g = int((g + m) * 255)
+    b = int((b + m) * 255)
+    return f"#{r:02X}{g:02X}{b:02X}"
 
-  const rows = PLAYERS.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) &&
-    (region === "ALL" || p.region === region)
-  );
+text       = "${text}"
+NUM_FRAMES = ${numFrames}
+DELAY      = ${delay}
+fmt        = "${format}"  # Custom formatting active
+
+frames = []
+for frame_i in range(NUM_FRAMES):
+    t = frame_i / (NUM_FRAMES - 1)
+    t_pp = 1 - abs(2 * t - 1)
+    hue = t_pp * 300
+    color = hsl_to_hex(hue, 1.0, 0.5)
+
+    k_speed = ${speed} 
+    k_val = (frame_i * k_speed / (NUM_FRAMES - 1)) % 2.0
+    k_bounce = 1 - abs(k_val - 1)
+    k_pos = int(k_bounce * (len(text) - 0.001))
+
+    middle = ""
+    for i, char in enumerate(text):
+        current_fmt = fmt if i >= 0 else ""
+        if i == k_pos:
+            middle += f"<{color}>{current_fmt}&l{char}&r"
+        else:
+            middle += f"<{color}>{current_fmt}{char}"
+    suffix = f"&r<{color}>"
+    frames.append(middle + suffix)
+
+for i, frame in enumerate(frames):
+    minescript.execute(f"animatedprefix {frame}")
+    minescript.echo(f"Frame {i+1}/{NUM_FRAMES}")
+    time.sleep(DELAY)
+
+minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
+
+    setGeneratedCode(script);
+  }, [text, numFrames, delay, format, speed]);
+
+  // Handle Live Frame Preview Loop simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPreviewFrame((prev) => (prev + 1) % numFrames);
+    }, delay * 150); // Normalized speed preview step
+
+    return () => clearInterval(interval);
+  }, [numFrames, delay]);
+
+  // Live calculation of preview frame parsing mock Minecraft syntax
+  useEffect(() => {
+    if (!text.length) return;
+    const t = previewFrame / (numFrames - 1 || 1);
+    const t_pp = 1 - Math.abs(2 * t - 1);
+    const color = hslToHex(t_pp * 300, 1.0, 0.5);
+
+    const k_val = (previewFrame * speed / (numFrames - 1 || 1)) % 2.0;
+    const k_bounce = 1 - Math.abs(k_val - 1);
+    const k_pos = Math.floor(k_bounce * (text.length - 0.001));
+
+    // Convert raw structural logic to CSS color inline indicators
+    let textStructure = '';
+    for (let i = 0; i < text.length; i++) {
+      if (i === k_pos) {
+        textStructure += `<span style="color: ${color}; font-weight: bold; font-style: ${format.includes('&o') ? 'italic' : 'normal'}">${text[i]}</span>`;
+      } else {
+        textStructure += `<span style="color: ${color}; font-style: ${format.includes('&o') ? 'italic' : 'normal'}">${text[i]}</span>`;
+      }
+    }
+    setPreviewText(textStructure);
+  }, [previewFrame, text, numFrames, speed, format]);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div style={{ minHeight:"100vh", background:bg, color:text, fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", fontSize:14 }}>
-      <style>{`
-        *{box-sizing:border-box;margin:0;padding:0}
-        ::-webkit-scrollbar{width:4px;height:4px}
-        ::-webkit-scrollbar-thumb{background:#c00;border-radius:2px}
-
-        .navtab{background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-size:13px;font-family:inherit;padding:13px 15px;color:${muted};transition:color .1s,border-color .1s;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:4px;white-space:nowrap}
-        .navtab:hover{color:${text}}
-        .navtab.on{color:${text};border-bottom-color:${text}}
-
-        .prow{display:grid;grid-template-columns:52px 1fr 72px 1fr;align-items:center;padding:0 16px;height:70px;border-bottom:1px solid ${border};transition:background .08s;cursor:pointer}
-        .prow:hover{background:${hover}}
-        .prow:last-child{border-bottom:none}
-
-        .tpill{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:20px;padding:0 4px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.02em}
-
-        .rbtn{background:none;border:1px solid ${border};color:${muted};font-family:inherit;font-size:11px;padding:3px 8px;border-radius:3px;cursor:pointer;font-weight:500;transition:all .1s}
-        .rbtn:hover{color:${text};border-color:#666}
-        .rbtn.on{color:#dd2222;border-color:#dd2222;background:rgba(200,0,0,.07)}
-
-        .thm{background:none;border:none;font-family:inherit;font-size:11px;color:${muted};cursor:pointer;padding:3px 6px}
-        .thm:hover{color:${text}}
-        .thm.on{color:#dd2222}
-
-        input{background:${bg2};border:1px solid ${border};color:${text};font-family:inherit;font-size:13px;padding:5px 10px;border-radius:3px;outline:none}
-        input:focus{border-color:#c00}
-        input::placeholder{color:${muted}}
-
-        .crow{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid ${border};font-size:13px;transition:background .08s;cursor:pointer}
-        .crow:hover{background:${hover}}
-        .crow:last-child{border-bottom:none}
-      `}</style>
-
-      {/* ── TOP NAV ── */}
-      <div style={{borderBottom:`1px solid ${border}`,background:dk?"#0f1018":bg,position:"sticky",top:0,zIndex:10}}>
-        <div style={{maxWidth:1120,margin:"0 auto",display:"flex",alignItems:"stretch",padding:"0 8px"}}>
-          <div style={{display:"flex",alignItems:"center",paddingRight:20,paddingLeft:8,borderRight:`1px solid ${border}`,marginRight:4}}>
-            <span style={{fontWeight:800,fontSize:14,color:"#cc0000",letterSpacing:".08em"}}>ABUS3TIERS</span>
+    <div className="min-h-screen bg-[#0A0A0A] text-[#E5E5E5] p-6 flex flex-col items-center justify-center selection:bg-[#252525]" style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
+      <div className="w-full max-w-4xl space-y-8">
+        
+        {/* Header Component */}
+        <header className="border-b border-[#1A1A1A] pb-5 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-white flex items-center gap-2">
+              <Terminal className="w-5 h-5 text-neutral-400" /> Minescript Prefix Engine
+            </h1>
+            <p className="text-xs text-neutral-500 mt-1">Minimalist template configuration & execution matrix.</p>
           </div>
-          <button className={`navtab${tab==="overall"?" on":""}`} onClick={()=>setTab("overall")}>
-            <span style={{fontSize:18}}>⚔️</span>
-            <span>Overall</span>
-          </button>
-          <button className={`navtab${tab==="tiers"?" on":""}`} onClick={()=>setTab("tiers")}>
-            <span style={{fontSize:18}}>🏆</span>
-            <span>Adm1n</span>
-          </button>
-          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:2,paddingRight:8}}>
-            {(["system","dark","light"] as Theme[]).map(t=>(
-              <button key={t} className={`thm${theme===t?" on":""}`} onClick={()=>setTheme(t)}>
-                {t==="system"?"auto":t}
+          <div className="flex items-center gap-2 text-xs bg-[#121212] border border-[#1A1A1A] px-3 py-1.5 rounded text-neutral-400">
+            <Sparkles className="w-3.5 h-3.5" /> Vercel Deployment Stable
+          </div>
+        </header>
+
+        <main className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          
+          {/* Controls Segment */}
+          <section className="md:col-span-5 space-y-5">
+            <div className="flex items-center gap-2 text-sm font-medium text-white mb-2">
+              <Settings className="w-4 h-4 text-neutral-400" /> Configuration Parameters
+            </div>
+            
+            <div className="space-y-4 bg-[#121212] p-5 rounded border border-[#1A1A1A]">
+              <div>
+                <label className="block text-xs font-medium text-neutral-400 mb-1.5">Prefix Plain Text</label>
+                <input 
+                  type="text" 
+                  value={text} 
+                  onChange={(e) => setText(e.target.value)}
+                  className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-neutral-400 mb-1.5">Total Frames</label>
+                  <input 
+                    type="number" 
+                    value={numFrames} 
+                    onChange={(e) => setNumFrames(Math.max(2, parseInt(e.target.value) || 0))}
+                    className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-neutral-400 mb-1.5">Delay (Seconds)</label>
+                  <input 
+                    type="number" 
+                    step="0.1" 
+                    value={delay} 
+                    onChange={(e) => setDelay(Math.max(0.01, parseFloat(e.target.value) || 0))}
+                    className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-neutral-400 mb-1.5">Bounce Speed</label>
+                  <input 
+                    type="number" 
+                    value={speed} 
+                    onChange={(e) => setSpeed(Math.max(1, parseInt(e.target.value) || 0))}
+                    className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-neutral-400 mb-1.5">Format Token</label>
+                  <select 
+                    value={format} 
+                    onChange={(e) => setFormat(e.target.value)}
+                    className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors appearance-none"
+                  >
+                    <option value="&o">Italic (&amp;o)</option>
+                    <option value="&n">Underline (&amp;n)</option>
+                    <option value="">None</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Live Sandbox Render Simulator */}
+            <div className="bg-[#121212] p-5 rounded border border-[#1A1A1A] space-y-3">
+              <div className="flex items-center justify-between text-xs font-medium text-neutral-400">
+                <span className="flex items-center gap-1.5"><RefreshCw className="w-3.5 h-3.5 animate-spin-slow" /> Terminal Preview Matrix</span>
+                <span className="text-neutral-600">F: {previewFrame + 1}/{numFrames}</span>
+              </div>
+              <div className="bg-black/40 border border-[#1A1A1A] p-4 rounded text-center font-mono tracking-wider h-14 flex items-center justify-center text-lg">
+                <div dangerouslySetInnerHTML={{ __html: previewText || '...' }} />
+              </div>
+            </div>
+          </section>
+
+          {/* Code Artifact output */}
+          <section className="md:col-span-7 flex flex-col space-y-2">
+            <div className="flex items-center justify-between text-sm font-medium text-white mb-1">
+              <span className="flex items-center gap-2"><Code className="w-4 h-4 text-neutral-400" /> Generated Python Executable</span>
+              <button 
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white bg-[#121212] hover:bg-[#1A1A1A] border border-[#1A1A1A] px-2.5 py-1 rounded transition-all active:scale-[0.98]"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-400">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Code</span>
+                  </>
+                )}
               </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div style={{maxWidth:1120,margin:"0 auto",padding:"16px 12px 60px"}}>
-
-        {/* ══ OVERALL ══ */}
-        {tab==="overall" && <>
-          <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
-            <input placeholder="Search player..." value={search} onChange={e=>setSearch(e.target.value)} style={{width:175}}/>
-            <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
-              {["ALL","NA","EU","AS","SA","OC"].map(r=>(
-                <button key={r} className={`rbtn${region===r?" on":""}`} onClick={()=>setRegion(r)}>{r}</button>
-              ))}
             </div>
-            <span style={{marginLeft:"auto",fontSize:11,color:muted}}>{rows.length} players</span>
-          </div>
 
-          {/* header row */}
-          <div style={{display:"grid",gridTemplateColumns:"52px 1fr 72px 1fr",padding:"0 16px",height:26,background:bg2,border:`1px solid ${border}`,borderBottom:"none",borderRadius:"4px 4px 0 0",alignItems:"center"}}>
-            {["#","PLAYER","REGION","TIERS"].map(h=>(
-              <span key={h} style={{fontSize:10,fontWeight:700,color:muted,letterSpacing:".08em"}}>{h}</span>
-            ))}
-          </div>
-
-          <div style={{border:`1px solid ${border}`,borderRadius:"0 0 4px 4px",overflow:"hidden"}}>
-            {rows.map((p,i)=>{
-              const rankBg = p.rank===1?"#a06800":p.rank===2?"#4a4a58":p.rank===3?"#7a3e18":bg2;
-              const rankFg = p.rank<=3?"#fff":muted;
-              return (
-                <div key={i} className="prow"
-                  onMouseEnter={e=>(e.currentTarget.style.background=hover)}
-                  onMouseLeave={e=>(e.currentTarget.style.background="")}>
-                  {/* rank box */}
-                  <div>
-                    <div style={{width:36,height:36,background:rankBg,borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:14,color:rankFg}}>
-                      {p.rank}.
-                    </div>
-                  </div>
-                  {/* player */}
-                  <div style={{display:"flex",alignItems:"center",gap:10,overflow:"hidden"}}>
-                    <Avatar name={p.name} size={38}/>
-                    <div style={{overflow:"hidden"}}>
-                      <div style={{fontWeight:700,fontSize:15,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.name}</div>
-                      <div style={{fontSize:11,color:muted,marginTop:2,display:"flex",alignItems:"center",gap:3}}>
-                        <span style={{color:"#b06020"}}>◈</span>
-                        {p.title}
-                        <span style={{color:dk?"#3a3a4a":"#bbb"}}>({p.points} pts)</span>
-                      </div>
-                    </div>
-                  </div>
-                  {/* region */}
-                  <div>
-                    <span style={{display:"inline-block",padding:"3px 9px",borderRadius:3,background:REGION_COLOR[p.region]??"#555",color:"#fff",fontSize:12,fontWeight:700,letterSpacing:".04em"}}>
-                      {p.region}
-                    </span>
-                  </div>
-                  {/* tiers */}
-                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                    {p.tiers.map((t,ti)=>{
-                      const tc=TIER_COLOR[t]??TIER_COLOR["-"];
-                      return <span key={ti} className="tpill" style={{background:tc.bg,color:tc.text,border:`1px solid ${tc.text}28`}}>{t}</span>;
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-            {rows.length===0&&<div style={{padding:"22px 16px",fontSize:13,color:muted}}>No results.</div>}
-          </div>
-        </>}
-
-        {/* ══ TIERS ══ */}
-        {tab==="tiers" && (
-          <div style={{overflowX:"auto"}}>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(5,minmax(190px,1fr))",minWidth:900,border:`1px solid ${border}`,borderRadius:4,overflow:"hidden"}}>
-              {TIER_COLS.map((col,ci)=>(
-                <div key={col.key} style={{borderRight:ci<4?`1px solid ${border}`:"none"}}>
-                  {/* header */}
-                  <div style={{
-                    background:col.headerBg,
-                    borderBottom:`1px solid ${col.headerBorder}`,
-                    borderTop:`2px solid ${col.headerBorder}`,
-                    padding:"12px 12px",
-                    display:"flex",alignItems:"center",gap:7,
-                  }}>
-                    {col.trophy&&<span style={{fontSize:16}}>{col.trophy}</span>}
-                    <span style={{fontWeight:700,fontSize:15,color:col.nameColor}}>{col.key}</span>
-                  </div>
-                  {/* players */}
-                  {(TIER_PLAYERS[col.key]??[]).map((name,pi)=>(
-                    <div key={pi} className="crow">
-                      <Avatar name={name} size={26}/>
-                      <span style={{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontSize:13}}>{name}</span>
-                      <svg width="13" height="13" viewBox="0 0 12 12" fill="none" style={{flexShrink:0,opacity:.35}}>
-                        <path d="M2 8l4-4 4 4" stroke={text} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M2 5l4-4 4 4" stroke={text} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-              ))}
+            <div className="flex-1 bg-[#121212] border border-[#1A1A1A] rounded p-4 font-mono text-xs overflow-auto max-h-[410px] text-neutral-300 leading-relaxed custom-scrollbar">
+              <pre className="whitespace-pre">{generatedCode}</pre>
             </div>
-          </div>
-        )}
+          </section>
+
+        </main>
+
+        <footer className="text-center text-[11px] text-neutral-600 pt-4 border-t border-[#1A1A1A]">
+          Execute locally within your Minecraft environment containing the valid Python framework extension.
+        </footer>
       </div>
     </div>
   );
