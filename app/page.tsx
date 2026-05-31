@@ -1,8 +1,29 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { Copy, Check, Settings, Code, Sparkles, Terminal, RefreshCw } from 'lucide-react';
+
+// --- MINIMALIST INLINE SVG ICONS (Replaces lucide-react to avoid dependency errors) ---
+const IconTerminal = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+);
+const IconSettings = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+);
+const IconCode = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+);
+const IconCopy = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+);
+const IconCheck = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+);
+const IconSparkles = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg>
+);
 
 export default function MinescriptGenerator() {
-  // State management for generator configuration
+  // State variables for application controls
   const [text, setText] = useState('MINE');
   const [numFrames, setNumFrames] = useState(100);
   const [delay, setDelay] = useState(1.2);
@@ -14,7 +35,7 @@ export default function MinescriptGenerator() {
   const [previewFrame, setPreviewFrame] = useState(0);
   const [previewText, setPreviewText] = useState('');
 
-  // HSL to HEX helper logic matching the Python backend script logic
+  // HSL to HEX translation matching the original script matrix
   const hslToHex = (h: number, s: number, l: number): string => {
     const c = (1 - Math.abs(2 * l - 1)) * s;
     const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
@@ -28,12 +49,15 @@ export default function MinescriptGenerator() {
     else if (h < 300) { r = x; g = 0; b = c; }
     else { r = c; g = 0; b = x; }
 
-    return `#${Math.floor((r + m) * 255).toString(16).padStart(2, '0').toUpperCase()}${Math.floor((g + m) * 255).toString(16).padStart(2, '0').toUpperCase()}${Math.floor((b + m) * 255).toString(16).padStart(2, '0').toUpperCase()}`;
+    const rHex = Math.floor((r + m) * 255).toString(16).padStart(2, '0').toUpperCase();
+    const gHex = Math.floor((g + m) * 255).toString(16).padStart(2, '0').toUpperCase();
+    const bHex = Math.floor((b + m) * 255).toString(16).padStart(2, '0').toUpperCase();
+
+    return `#${rHex}${gHex}${bHex}`;
   };
 
-  // Generate Python Script & Live Preview String
+  // Live Generator Hook for the final Python source string
   useEffect(() => {
-    // Generate Code template dynamically stringified
     const script = `import minescript
 import time
 
@@ -55,7 +79,7 @@ def hsl_to_hex(h, s, l):
 text       = "${text}"
 NUM_FRAMES = ${numFrames}
 DELAY      = ${delay}
-fmt        = "${format}"  # Custom formatting active
+fmt        = "${format}"  # Structural text modifier
 
 frames = []
 for frame_i in range(NUM_FRAMES):
@@ -89,34 +113,43 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
     setGeneratedCode(script);
   }, [text, numFrames, delay, format, speed]);
 
-  // Handle Live Frame Preview Loop simulation
+  // Frame sequencing loop for sandbox visualization
   useEffect(() => {
     const interval = setInterval(() => {
-      setPreviewFrame((prev) => (prev + 1) % numFrames);
-    }, delay * 150); // Normalized speed preview step
+      setPreviewFrame((prev) => (prev + 1) % (numFrames || 1));
+    }, delay * 130);
 
     return () => clearInterval(interval);
   }, [numFrames, delay]);
 
-  // Live calculation of preview frame parsing mock Minecraft syntax
+  // Generate HTML compilation for DOM simulator string layout
   useEffect(() => {
-    if (!text.length) return;
-    const t = previewFrame / (numFrames - 1 || 1);
+    if (!text.length) {
+      setPreviewText('');
+      return;
+    }
+    const currentFrameSafe = previewFrame % (numFrames || 1);
+    const t = currentFrameSafe / ((numFrames - 1) || 1);
     const t_pp = 1 - Math.abs(2 * t - 1);
     const color = hslToHex(t_pp * 300, 1.0, 0.5);
 
-    const k_val = (previewFrame * speed / (numFrames - 1 || 1)) % 2.0;
+    const k_val = (currentFrameSafe * speed / ((numFrames - 1) || 1)) % 2.0;
     const k_bounce = 1 - Math.abs(k_val - 1);
     const k_pos = Math.floor(k_bounce * (text.length - 0.001));
 
-    // Convert raw structural logic to CSS color inline indicators
     let textStructure = '';
     for (let i = 0; i < text.length; i++) {
-      if (i === k_pos) {
-        textStructure += `<span style="color: ${color}; font-weight: bold; font-style: ${format.includes('&o') ? 'italic' : 'normal'}">${text[i]}</span>`;
-      } else {
-        textStructure += `<span style="color: ${color}; font-style: ${format.includes('&o') ? 'italic' : 'normal'}">${text[i]}</span>`;
-      }
+      const isItalic = format.includes('&o');
+      const isUnderline = format.includes('&n');
+      const styles = `
+        color: ${color}; 
+        font-weight: ${i === k_pos ? 'bold' : 'normal'}; 
+        font-style: ${isItalic ? 'italic' : 'normal'};
+        text-decoration: ${isUnderline ? 'underline' : 'none'};
+        display: inline-block;
+        transition: color 0.05s ease;
+      `;
+      textStructure += `<span style="${styles}">${text[i]}</span>`;
     }
     setPreviewText(textStructure);
   }, [previewFrame, text, numFrames, speed, format]);
@@ -131,25 +164,26 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
     <div className="min-h-screen bg-[#0A0A0A] text-[#E5E5E5] p-6 flex flex-col items-center justify-center selection:bg-[#252525]" style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
       <div className="w-full max-w-4xl space-y-8">
         
-        {/* Header Component */}
+        {/* Top Navbar Section */}
         <header className="border-b border-[#1A1A1A] pb-5 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-white flex items-center gap-2">
-              <Terminal className="w-5 h-5 text-neutral-400" /> Minescript Prefix Engine
+              <IconTerminal /> Minescript Prefix Engine
             </h1>
             <p className="text-xs text-neutral-500 mt-1">Minimalist template configuration & execution matrix.</p>
           </div>
           <div className="flex items-center gap-2 text-xs bg-[#121212] border border-[#1A1A1A] px-3 py-1.5 rounded text-neutral-400">
-            <Sparkles className="w-3.5 h-3.5" /> Vercel Deployment Stable
+            <IconSparkles /> Vercel Deployment Stable
           </div>
         </header>
 
+        {/* Dashboard Grid Workspace */}
         <main className="grid grid-cols-1 md:grid-cols-12 gap-8">
           
-          {/* Controls Segment */}
+          {/* Settings Matrix Column */}
           <section className="md:col-span-5 space-y-5">
             <div className="flex items-center gap-2 text-sm font-medium text-white mb-2">
-              <Settings className="w-4 h-4 text-neutral-400" /> Configuration Parameters
+              <IconSettings /> Configuration Parameters
             </div>
             
             <div className="space-y-4 bg-[#121212] p-5 rounded border border-[#1A1A1A]">
@@ -210,11 +244,11 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
               </div>
             </div>
 
-            {/* Live Sandbox Render Simulator */}
+            {/* Sandbox Render Simulator Viewport */}
             <div className="bg-[#121212] p-5 rounded border border-[#1A1A1A] space-y-3">
               <div className="flex items-center justify-between text-xs font-medium text-neutral-400">
-                <span className="flex items-center gap-1.5"><RefreshCw className="w-3.5 h-3.5 animate-spin-slow" /> Terminal Preview Matrix</span>
-                <span className="text-neutral-600">F: {previewFrame + 1}/{numFrames}</span>
+                <span className="flex items-center gap-1.5">Terminal Preview Matrix</span>
+                <span className="text-neutral-600 font-mono">F: {previewFrame + 1}/{numFrames}</span>
               </div>
               <div className="bg-black/40 border border-[#1A1A1A] p-4 rounded text-center font-mono tracking-wider h-14 flex items-center justify-center text-lg">
                 <div dangerouslySetInnerHTML={{ __html: previewText || '...' }} />
@@ -222,29 +256,29 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
             </div>
           </section>
 
-          {/* Code Artifact output */}
+          {/* Compiled Output Artifact Column */}
           <section className="md:col-span-7 flex flex-col space-y-2">
             <div className="flex items-center justify-between text-sm font-medium text-white mb-1">
-              <span className="flex items-center gap-2"><Code className="w-4 h-4 text-neutral-400" /> Generated Python Executable</span>
+              <span className="flex items-center gap-2"><IconCode /> Generated Python Executable</span>
               <button 
                 onClick={handleCopy}
                 className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white bg-[#121212] hover:bg-[#1A1A1A] border border-[#1A1A1A] px-2.5 py-1 rounded transition-all active:scale-[0.98]"
               >
                 {copied ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <IconCheck />
                     <span className="text-emerald-400">Copied</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5" />
+                    <IconCopy />
                     <span>Copy Code</span>
                   </>
                 )}
               </button>
             </div>
 
-            <div className="flex-1 bg-[#121212] border border-[#1A1A1A] rounded p-4 font-mono text-xs overflow-auto max-h-[410px] text-neutral-300 leading-relaxed custom-scrollbar">
+            <div className="flex-1 bg-[#121212] border border-[#1A1A1A] rounded p-4 font-mono text-xs overflow-auto max-h-[410px] text-neutral-300 leading-relaxed">
               <pre className="whitespace-pre">{generatedCode}</pre>
             </div>
           </section>
