@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-// --- INLINE SVG ICONS ---
+// --- CUSTOM SVG ICONS (Lucide Style Fallbacks) ---
 const IconTerminal = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
 );
@@ -21,19 +21,23 @@ const IconCheck = () => (
 const IconEye = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
 );
+const IconChevronUp = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+);
+const IconChevronDown = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+);
 
 export default function MinescriptGenerator() {
-  // Config state keys
   const [text, setText] = useState('MINE');
   const [numFrames, setNumFrames] = useState(100);
   const [delay, setDelay] = useState(1.2);
   const [speed, setSpeed] = useState(2);
   
-  // Multi-formatting token selections
   const [formats, setFormats] = useState({
-    italic: true,    // &o
-    underline: false, // &n
-    strikethrough: false, // &m
+    italic: true,
+    underline: false,
+    strikethrough: false,
   });
 
   const [generatedCode, setGeneratedCode] = useState('');
@@ -41,7 +45,6 @@ export default function MinescriptGenerator() {
   const [previewFrame, setPreviewFrame] = useState(0);
   const [previewText, setPreviewText] = useState('');
 
-  // Computed compound format token (e.g. "&o&n")
   const getFormatString = () => {
     let token = '';
     if (formats.italic) token += '&o';
@@ -50,31 +53,27 @@ export default function MinescriptGenerator() {
     return token;
   };
 
-  // Safe input handlers maintaining system minimum/maximum specs
   const handleFrameChange = (val: number) => {
     let checked = Math.max(2, val);
-    if (checked > 100) checked = 100; // Cap at 100 frames max
+    if (checked > 100) checked = 100;
     setNumFrames(checked);
   };
 
   const handleDelayChange = (val: number) => {
-    let checked = Math.max(1.2, val); // Floor logic at 1.2s minimum
+    const checked = Math.max(1.2, parseFloat(val.toFixed(1)) || 1.2);
     setDelay(checked);
   };
 
-  // Action callback to handle user clipboard interactions
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Helper insertion function for invisible Unicode payloads
   const injectSpecialChar = (unicodeStr: string) => {
     setText(prev => prev + unicodeStr);
   };
 
-  // Match Python HSL system color configurations
   const hslToHex = (h: number, s: number, l: number): string => {
     const c = (1 - Math.abs(2 * l - 1)) * s;
     const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
@@ -94,7 +93,6 @@ export default function MinescriptGenerator() {
     return `#${rHex}${gHex}${bHex}`;
   };
 
-  // Python text output structural composition calculation
   useEffect(() => {
     const fmtStr = getFormatString();
     const script = `import minescript
@@ -152,7 +150,6 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
     setGeneratedCode(script);
   }, [text, numFrames, delay, formats, speed]);
 
-  // Handle active rendering ticks for DOM visual sandbox
   useEffect(() => {
     const interval = setInterval(() => {
       setPreviewFrame((prev) => (prev + 1) % (numFrames || 1));
@@ -160,7 +157,6 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
     return () => clearInterval(interval);
   }, [numFrames, delay]);
 
-  // Format visibility preview builder
   useEffect(() => {
     if (!text.length) {
       setPreviewText('');
@@ -185,7 +181,7 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
       else if (charDisplay === '\u2060') { charDisplay = '❲WJ❳'; isSpecial = true; }
 
       const styles = `
-        color: ${isSpecial ? '#666666' : color};
+        color: ${isSpecial ? '#555555' : color};
         font-size: ${isSpecial ? '10px' : 'inherit'};
         font-weight: ${i === k_pos && !isSpecial ? 'bold' : 'normal'}; 
         font-style: ${formats.italic && !isSpecial ? 'italic' : 'normal'};
@@ -198,172 +194,179 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
   }, [previewFrame, text, numFrames, speed, formats]);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#E5E5E5] p-6 flex flex-col items-center justify-center selection:bg-[#252525]" style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
-      <div className="w-full max-w-4xl space-y-8">
+    <div className="min-h-screen bg-[#070707] text-[#D4D4D4] p-6 flex flex-col items-center justify-center selection:bg-[#222]" style={{ fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif" }}>
+      
+      {/* Dynamic Global Scrollbar Styling */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #0e0e0e; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #333; }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+      `}} />
+
+      <div className="w-full max-w-4xl space-y-8 animate-fade-in">
         
-        {/* Navbar */}
-        <header className="border-b border-[#1A1A1A] pb-5 flex items-center justify-between">
+        {/* Header */}
+        <header className="border-b border-[#161616] pb-5 flex items-center justify-between transition-all duration-300">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-white flex items-center gap-2">
-              <IconTerminal /> Minescript Engine Matrix
+            <h1 className="text-lg font-medium tracking-tight text-[#f3f3f3] flex items-center gap-2">
+              <IconTerminal /> Minescript Matrix Config
             </h1>
-            <p className="text-xs text-neutral-500 mt-1">Configurator optimized for custom structures and invisible padding rules.</p>
+            <p className="text-xs text-neutral-600 mt-0.5">Minimalist engine configuration.</p>
           </div>
         </header>
 
-        {/* Workspace Panels */}
+        {/* Core Layout Panels */}
         <main className="grid grid-cols-1 md:grid-cols-12 gap-8">
           
-          {/* Controls Segment */}
+          {/* Settings Segment */}
           <section className="md:col-span-5 space-y-5">
-            <div className="flex items-center gap-2 text-sm font-medium text-white mb-2">
-              <IconSettings /> Configuration Matrix
+            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-400 tracking-wider uppercase mb-1">
+              <IconSettings /> Variables
             </div>
             
-            <div className="space-y-4 bg-[#121212] p-5 rounded border border-[#1A1A1A]">
-              {/* String Input */}
+            <div className="space-y-4 bg-[#0d0d0d] p-5 rounded border border-[#161616] hover:border-[#222] transition-colors duration-300">
+              {/* String Value */}
               <div>
-                <label className="block text-xs font-medium text-neutral-400 mb-1.5">Prefix Plain Text</label>
+                <label className="block text-[11px] font-medium text-neutral-500 uppercase tracking-wider mb-1.5">Prefix Text</label>
                 <input 
                   type="text" 
                   value={text} 
                   onChange={(e) => setText(e.target.value)}
-                  className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
+                  className="w-full bg-[#050505] border border-[#1c1c1c] rounded px-3 py-2 text-sm text-[#f3f3f3] focus:outline-none focus:border-neutral-600 transition-all duration-200"
                 />
               </div>
 
-              {/* Invisible Character Injection Toolbar */}
+              {/* Invisible Unicode Blocks */}
               <div>
-                <label className="block text-xs font-medium text-neutral-400 mb-1.5">Inject Invisible Unicode Characters</label>
+                <label className="block text-[11px] font-medium text-neutral-500 uppercase tracking-wider mb-1.5">Inject Invisibles</label>
                 <div className="grid grid-cols-3 gap-1.5">
-                  <button 
-                    type="button"
-                    onClick={() => injectSpecialChar('\u200C')}
-                    className="bg-[#181818] border border-[#252525] hover:border-neutral-500 px-2 py-1.5 text-[10px] rounded text-neutral-300 transition-colors text-center"
-                    title="Zero Width Non-Joiner"
-                  >
-                    + ZWNJ
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => injectSpecialChar('\u200B')}
-                    className="bg-[#181818] border border-[#252525] hover:border-neutral-500 px-2 py-1.5 text-[10px] rounded text-neutral-300 transition-colors text-center"
-                    title="Zero Width Space"
-                  >
-                    + ZWSP
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => injectSpecialChar('\u2060')}
-                    className="bg-[#181818] border border-[#252525] hover:border-neutral-500 px-2 py-1.5 text-[10px] rounded text-neutral-300 transition-colors text-center"
-                    title="Word Joiner"
-                  >
-                    + WJ
-                  </button>
+                  { [['\u200C', 'ZWNJ'], ['\u200B', 'ZWSP'], ['\u2060', 'WJ']].map(([char, name]) => (
+                    <button 
+                      key={name}
+                      type="button"
+                      onClick={() => injectSpecialChar(char)}
+                      className="bg-[#050505] border border-[#1c1c1c] hover:border-neutral-600 px-2 py-1.5 text-[10px] rounded text-neutral-400 transition-all duration-200 active:scale-95"
+                    >
+                      + {name}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Numerical Control Matrix */}
+              {/* Advanced Custom Stepper Arrays */}
               <div className="grid grid-cols-2 gap-3">
+                {/* Total Frames Box */}
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-medium text-neutral-400">Total Frames</label>
-                    <span className="text-[10px] text-neutral-600">Max 100</span>
+                    <label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">Frames</label>
+                    <span className="text-[9px] text-neutral-600">Max 100</span>
                   </div>
-                  <input 
-                    type="number" 
-                    value={numFrames} 
-                    max={100}
-                    onChange={(e) => handleFrameChange(parseInt(e.target.value) || 0)}
-                    className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
-                  />
+                  <div className="relative flex items-center bg-[#050505] border border-[#1c1c1c] rounded focus-within:border-neutral-600 transition-all duration-200">
+                    <input 
+                      type="number" 
+                      value={numFrames} 
+                      max={100}
+                      onChange={(e) => handleFrameChange(parseInt(e.target.value) || 0)}
+                      className="w-full bg-transparent px-3 py-2 text-sm text-[#f3f3f3] focus:outline-none"
+                    />
+                    <div className="flex flex-col border-l border-[#1c1c1c] h-full">
+                      <button type="button" onClick={() => handleFrameChange(numFrames + 1)} className="p-1 text-neutral-500 hover:text-neutral-200 hover:bg-[#111] transition-all rounded-tr active:scale-90"><IconChevronUp /></button>
+                      <button type="button" onClick={() => handleFrameChange(numFrames - 1)} className="p-1 border-t border-[#1c1c1c] text-neutral-500 hover:text-neutral-200 hover:bg-[#111] transition-all rounded-br active:scale-90"><IconChevronDown /></button>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Delay Speed Box */}
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-medium text-neutral-400">Delay (Sec)</label>
-                    <span className="text-[10px] text-neutral-600">Min 1.2</span>
+                    <label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">Delay</label>
+                    <span className="text-[9px] text-neutral-600">Min 1.2</span>
                   </div>
-                  <input 
-                    type="number" 
-                    step="0.1" 
-                    value={delay}
-                    onChange={(e) => handleDelayChange(parseFloat(e.target.value) || 0)}
-                    className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
-                  />
+                  <div className="relative flex items-center bg-[#050505] border border-[#1c1c1c] rounded focus-within:border-neutral-600 transition-all duration-200">
+                    <input 
+                      type="number" 
+                      step="0.1" 
+                      value={delay}
+                      onChange={(e) => handleDelayChange(parseFloat(e.target.value) || 0)}
+                      className="w-full bg-transparent px-3 py-2 text-sm text-[#f3f3f3] focus:outline-none"
+                    />
+                    <div className="flex flex-col border-l border-[#1c1c1c] h-full">
+                      <button type="button" onClick={() => handleDelayChange(delay + 0.1)} className="p-1 text-neutral-500 hover:text-neutral-200 hover:bg-[#111] transition-all rounded-tr active:scale-90"><IconChevronUp /></button>
+                      <button type="button" onClick={() => handleDelayChange(delay - 0.1)} className="p-1 border-t border-[#1c1c1c] text-neutral-500 hover:text-neutral-200 hover:bg-[#111] transition-all rounded-br active:scale-90"><IconChevronDown /></button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Bounce Velocity Input */}
+              {/* Bounce Speed custom stepper */}
               <div>
-                <label className="block text-xs font-medium text-neutral-400 mb-1.5">Bounce Animation Speed</label>
-                <input 
-                  type="number" 
-                  value={speed} 
-                  onChange={(e) => setSpeed(Math.max(1, parseInt(e.target.value) || 0))}
-                  className="w-full bg-[#181818] border border-[#252525] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-500 transition-colors"
-                />
+                <label className="block text-[11px] font-medium text-neutral-500 uppercase tracking-wider mb-1.5">Animation Velocity</label>
+                <div className="relative flex items-center bg-[#050505] border border-[#1c1c1c] rounded focus-within:border-neutral-600 transition-all duration-200">
+                  <input 
+                    type="number" 
+                    value={speed} 
+                    onChange={(e) => setSpeed(Math.max(1, parseInt(e.target.value) || 0))}
+                    className="w-full bg-transparent px-3 py-2 text-sm text-[#f3f3f3] focus:outline-none"
+                  />
+                  <div className="flex flex-col border-l border-[#1c1c1c] h-full">
+                    <button type="button" onClick={() => setSpeed(speed + 1)} className="p-1 text-neutral-500 hover:text-neutral-200 hover:bg-[#111] transition-all active:scale-90"><IconChevronUp /></button>
+                    <button type="button" onClick={() => setSpeed(Math.max(1, speed - 1))} className="p-1 border-t border-[#1c1c1c] text-neutral-500 hover:text-neutral-200 hover:bg-[#111] transition-all active:scale-90"><IconChevronDown /></button>
+                  </div>
+                </div>
               </div>
 
-              {/* Multi-Format Block Option Layers */}
-              <div className="pt-2 border-t border-[#1A1A1A]">
-                <label className="block text-xs font-medium text-neutral-400 mb-2">Active Format Code Layers</label>
+              {/* Completely Custom Formatter Toggles */}
+              <div className="pt-3 border-t border-[#161616]">
+                <label className="block text-[11px] font-medium text-neutral-500 uppercase tracking-wider mb-2.5">Minecraft Text Formats</label>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-xs text-neutral-300 cursor-pointer select-none">
-                    <input 
-                      type="checkbox" 
-                      checked={formats.italic}
-                      onChange={(e) => setFormats(prev => ({...prev, italic: e.target.checked}))}
-                      className="accent-neutral-500 rounded bg-[#181818] border-[#252525]"
-                    />
-                    <span>Italic Code (<span className="text-neutral-500">&amp;o</span>)</span>
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-neutral-300 cursor-pointer select-none">
-                    <input 
-                      type="checkbox" 
-                      checked={formats.underline}
-                      onChange={(e) => setFormats(prev => ({...prev, underline: e.target.checked}))}
-                      className="accent-neutral-500 rounded bg-[#181818] border-[#252525]"
-                    />
-                    <span>Underline Code (<span className="text-neutral-500">&amp;n</span>)</span>
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-neutral-300 cursor-pointer select-none">
-                    <input 
-                      type="checkbox" 
-                      checked={formats.strikethrough}
-                      onChange={(e) => setFormats(prev => ({...prev, strikethrough: e.target.checked}))}
-                      className="accent-neutral-500 rounded bg-[#181818] border-[#252525]"
-                    />
-                    <span>Strikethrough Code (<span className="text-neutral-500">&amp;m</span>)</span>
-                  </label>
+                  {(Object.keys(formats) as Array<keyof typeof formats>).map((key) => (
+                    <div 
+                      key={key}
+                      onClick={() => setFormats(prev => ({ ...prev, [key]: !prev[key] }))}
+                      className="flex items-center gap-3 cursor-pointer group select-none py-0.5"
+                    >
+                      {/* Custom Checkbox Frame */}
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all duration-200 ${formats[key] ? 'bg-neutral-200 border-neutral-200 text-black' : 'bg-transparent border-[#2c2c2c] group-hover:border-neutral-500'}`}>
+                        {formats[key] && <div className="w-2 h-2 bg-black rounded-sm animate-[scaleIn_0.15s_ease-out]" />}
+                      </div>
+                      <span className="text-xs text-neutral-400 group-hover:text-neutral-200 transition-colors capitalize">
+                        {key} <span className="text-neutral-600 text-[10px] font-mono">(&amp;{key === 'italic' ? 'o' : key === 'underline' ? 'n' : 'm'})</span>
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Live Visual Sandbox Terminal Rendering */}
-            <div className="bg-[#121212] p-5 rounded border border-[#1A1A1A] space-y-3">
-              <div className="flex items-center justify-between text-xs font-medium text-neutral-400">
-                <span className="flex items-center gap-1.5"><IconEye /> Realtime Sandbox Monitor</span>
-                <span className="text-neutral-600 font-mono">F: {previewFrame + 1}/{numFrames}</span>
+            {/* Simulated Live Frame Output Monitor */}
+            <div className="bg-[#0d0d0d] p-5 rounded border border-[#161616] space-y-3 hover:border-[#222] transition-colors duration-300">
+              <div className="flex items-center justify-between text-[11px] font-medium text-neutral-500 tracking-wider uppercase">
+                <span className="flex items-center gap-1.5"><IconEye /> Sandbox Monitor</span>
+                <span className="text-neutral-600 font-mono">Frame: {previewFrame + 1}/{numFrames}</span>
               </div>
-              <div className="bg-black/40 border border-[#1A1A1A] p-4 rounded text-center font-mono tracking-wider h-14 flex items-center justify-center text-lg overflow-hidden">
-                <div dangerouslySetInnerHTML={{ __html: previewText || '...' }} />
+              <div className="bg-[#040404] border border-[#161616] p-4 rounded text-center font-mono tracking-wider h-14 flex items-center justify-center text-lg overflow-hidden relative">
+                <div className="relative z-10" dangerouslySetInnerHTML={{ __html: previewText || '...' }} />
               </div>
             </div>
           </section>
 
-          {/* Compiled Output Artifact Column */}
-          <section className="md:col-span-7 flex flex-col space-y-2">
-            <div className="flex items-center justify-between text-sm font-medium text-white mb-1">
-              <span className="flex items-center gap-2"><IconCode /> Generated Script Output</span>
+          {/* Code Generation Terminal Panel */}
+          <section className="md:col-span-7 flex flex-col space-y-2 animate-[slideUp_0.4s_ease-out]">
+            <div className="flex items-center justify-between text-xs font-semibold text-neutral-400 tracking-wider uppercase mb-1">
+              <span className="flex items-center gap-2"><IconCode /> Executable Blueprint</span>
               <button 
                 type="button"
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white bg-[#121212] hover:bg-[#1A1A1A] border border-[#1A1A1A] px-2.5 py-1 rounded transition-all active:scale-[0.98]"
+                className="flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-[#f3f3f3] bg-[#0d0d0d] border border-[#161616] px-3 py-1 rounded transition-all duration-200 hover:border-neutral-600 active:scale-[0.97]"
               >
                 {copied ? (
                   <>
                     <IconCheck />
-                    <span className="text-emerald-400">Copied</span>
+                    <span className="text-neutral-200">Copied</span>
                   </>
                 ) : (
                   <>
@@ -374,15 +377,15 @@ minescript.echo(f"Done! {NUM_FRAMES} frames set.")`;
               </button>
             </div>
 
-            <div className="flex-1 bg-[#121212] border border-[#1A1A1A] rounded p-4 font-mono text-xs overflow-auto max-h-[490px] text-neutral-300 leading-relaxed custom-scrollbar">
-              <pre className="whitespace-pre">{generatedCode}</pre>
+            <div className="flex-1 bg-[#0d0d0d] border border-[#161616] hover:border-[#222] transition-colors duration-300 rounded p-4 font-mono text-xs overflow-auto max-h-[505px] text-neutral-400 leading-relaxed custom-scroll">
+              <pre className="whitespace-pre select-all text-[#a6a6a6]">{generatedCode}</pre>
             </div>
           </section>
 
         </main>
 
-        <footer className="text-center text-[11px] text-neutral-600 pt-4 border-t border-[#1A1A1A]">
-          Ensure your native implementation framework accommodates raw Unicode multi-byte characters accurately.
+        <footer className="text-center text-[10px] text-neutral-700 pt-2 border-t border-[#161616] tracking-wider uppercase">
+          Minescript Local Python Client Framework Module Target
         </footer>
       </div>
     </div>
